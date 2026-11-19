@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Little Gallery Save Editor</title>
+<style>
+:root{--ink:#25231f;--muted:#6a6356;--paper:#f5f0e7;--card:#fffdfa;--line:#e3d9c6;--gold:#e5b95e;--coral:#e98169;--mint:#9ec5a3;--dark:#282722}
+*{box-sizing:border-box}
+body{margin:0;background:#eee8dd;color:var(--ink);font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:980px;margin:0 auto;padding:24px 18px 60px}
+h1{font:700 26px Georgia,serif;margin:0 0 4px}
+.sub{color:var(--muted);margin:0 0 18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 18px;margin-bottom:14px}
+.card h2{font:700 15px Georgia,serif;margin:0 0 8px}
+ol.steps{margin:0;padding-left:20px;color:var(--muted)}ol.steps b{color:var(--ink)}
+textarea{width:100%;font:11px ui-monospace,Menlo,Consolas,monospace;border:1px solid var(--line);border-radius:10px;padding:9px;background:#fff;resize:vertical;color:var(--ink)}
+button{font:600 12px inherit;font-family:inherit;border:0;background:#ede5d7;color:var(--ink);border-radius:9px;padding:8px 12px;cursor:pointer}
+button:hover{background:#e2d7c2}
+button.pri{background:var(--dark);color:#f6cb75}button.pri:hover{background:#3a3932}
+button.sm{padding:5px 9px;font-size:11px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px}
+.msg{margin-top:8px;font-size:13px}.err{color:#b2573f}.ok{color:#4f7d62}
+.tabs{display:flex;gap:4px;flex-wrap:wrap;background:#f1ece2;padding:4px;border-radius:13px;margin-bottom:12px}
+.tab{background:none;color:var(--muted)}
+.tab.on{background:#fffdfa;color:var(--ink);box-shadow:0 2px 8px #3a2e1a14}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+label.f{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--muted)}
+label.f input,label.f select{font:13px ui-monospace,Menlo,Consolas,monospace;border:1px solid var(--line);border-radius:8px;padding:6px 8px;background:#fff;color:var(--ink);width:100%}
+label.chk{display:flex;gap:8px;align-items:center;font-size:13px;padding:5px 0}
+.note{font-size:12px;color:var(--muted);margin:6px 0 10px}
+.sum{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.pill{font:11px ui-monospace,Menlo,monospace;background:#ede5d7;padding:4px 9px;border-radius:12px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;color:var(--muted);font-weight:600;padding:4px 6px}
+td{padding:4px 4px;border-top:1px solid var(--line)}
+td input,td select{font:12px ui-monospace,Menlo,monospace;border:1px solid var(--line);border-radius:7px;padding:4px 6px;background:#fff;width:100%;color:var(--ink)}
+.trophies{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:2px 12px}
+.hidden{display:none}
+.warn{background:#fff6e2;border:1px solid #e6cf9a;border-radius:10px;padding:8px 12px;font-size:12px;color:#6a5530;margin-top:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+ <h1>🖼️ Little Gallery Save Editor</h1>
+ <p class="sub">Edit your save through the game's own Backup &amp; restore code. Nothing here touches the game's files, and everything stays in your browser.</p>
+
+ <div class="card">
+  <h2>How to use it</h2>
+  <ol class="steps">
+   <li>In the game, open the <b>Career</b> tab, click <b>Backup &amp; restore save</b>, and copy the code.</li>
+   <li>Paste it below and click <b>Decode</b>, then change whatever you like.</li>
+   <li>Copy the new code from the bottom of this page. In the game, open Backup &amp; restore, paste it, and click <b>Load pasted code</b>.</li>
+  </ol>
+  <div class="warn">Tip: copy your original code somewhere safe first so you can always go back. Close any other Little Gallery tabs while you load the new code.</div>
+ </div>
+
+ <div class="card">
+  <h2>1 · Paste your save code</h2>
+  <textarea id="inp" rows="4" spellcheck="false" placeholder="Paste the long code from Backup &amp; restore here…"></textarea>
+  <div class="row"><button class="pri" id="decodeBtn">Decode</button><button id="revertBtn" class="hidden">Revert all edits</button></div>
+  <div id="msg" class="msg"></div>
+  <div id="sum" class="sum"></div>
+ </div>
+
+ <div id="editor" class="hidden">
+  <div class="card">
+   <h2>2 · Edit</h2>
+   <div class="tabs" id="tabs"></div>
+   <div id="pane"></div>
+  </div>
+
+  <div class="card">
+   <h2>3 · Copy your new code</h2>
+   <label class="chk"><input type="checkbox" id="optSeen" checked> Mark the save as "last seen now" (skips the Welcome-back popup and offline earnings on load)</label>
+   <textarea id="out" rows="5" readonly spellcheck="false"></textarea>
+   <div class="row"><button class="pri" id="copyBtn">Copy code</button><span id="copyMsg" class="msg"></span></div>
+  </div>
+ </div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+const UPS=[['brush','Better brushes',99],['assistant','Hire an artist',99],['room','Expand the gallery',5],['market','Marketing',15],['light','Gallery lighting',10],['muse','Muse lamp',10],['storage','Storage racks',8],['mentor','Atelier mentor',10],['agent','Art agent',15],['patron','Patron circle',30],['autosell','Dealer on retainer',1],['autohang','Gallery manager',1],['sitters','Sitters & models (Portraitist)',10],['salesroom','Private salesroom (Dealer)',10],['docents','Docent tours (Curator)',10],['cat','Gallery cat',1]];
+const STYLES=[['sunrise','Sunrise Fields'],['forest','Forest Hush'],['harbor','Harbor Day'],['moon','Moonlit Lake'],['abstract','Abstract Bloom'],['desert','Dune Light'],['blossom','Blossom Wind'],['aurora','Northern Lights']];
+const RAR=['Common','Fine','Rare','Masterpiece','Legendary'];
+const CITIES=['The Sunroom','Harbor Loft','Hilltop Atelier','The Grand Salon','Dune Pavilion','Blossom Teahouse','Aurora Lodge','The Rotunda'];
+const SPECS=[['','None'],['portrait','Portraitist'],['dealer','Dealer'],['curator','Curator']];
+const ST=[['sales','Offers accepted'],['orders','Commissions delivered'],['visitors','Visitors welcomed'],['tips','Tips received'],['masters','Masterpieces or better'],['rares','Rare paintings'],['hangs','Paintings hung'],['legends','Legendary paintings'],['critics','Critic reviews'],['fairs','Art fairs'],['goals','Goals completed'],['donated','Paintings donated'],['pets','Cat pets'],['auctions','Auctions won'],['murals','Murals finished'],['vips','VIPs hosted']];
+const ACH=[['first','First Stroke'],['daily','Warming Up'],['steady','Steady Hand'],['marathon','Marathon Painter'],['coin100','Pocket Change'],['coin1k','Rising Patron'],['coin10k','Gallery Mogul'],['brush1','Fine Bristles'],['brush5','Master Brushwork'],['assist3','Studio Family'],['room1','Grand Opening'],['room3','Museum Wing'],['done1','Signed & Dated'],['done25','Prolific'],['rare','Rare Find'],['master','Masterpiece!'],['sale1','First Sale'],['sales10','Art Dealer'],['order3','Reliable Painter'],['fame1','New Horizons'],['str5k','Tendon Trouble'],['str25k','Ten Thousand Hours'],['str250k','Wrist of Legend'],['coin100k','Six Figures'],['coin1m','Art Millionaire'],['coin100m','Art Baron'],['coin1b','Museum Magnate'],['coin10b','Cultural Empire'],['brush10','Brush of Legend'],['brush20','Hands of Gold'],['assist10','Atelier Collective'],['assist25','Art Factory'],['agent5','Well Connected'],['mentor5','Good Teacher'],['patron10','Circle of Patrons'],['hands','Hands-Free'],['done100','Centenary'],['done1k','Thousand Canvases'],['done10k','Studio Factory'],['rares10','Eye for Rarity'],['masters5','Master Hand'],['masters25','Old Master'],['legend1','Legendary!'],['legend5','Living Legend'],['sales50','Auction House'],['order10','Trusted Studio'],['order30','Court Painter'],['order100','Hundred Clients'],['vis100','Open Doors'],['vis1k','Neighbourhood Draw'],['vis10k','City Landmark'],['critic1','Reviewed'],['critic10',"Critics' Darling"],['streak7','Week by Week'],['days14','Fortnight of Art'],['days30','A Month of Mornings'],['days40','Forty Days of Art'],['chap3','Citizen of the World'],['chap5','Seasoned Traveller'],['chap7','The Final Wing'],['won','The Grand Retrospective'],['stars10','Rising Fame'],['goals50','Goal Getter'],['donor','Generous Curator'],['auc1','Going Once'],['auc10','Gavel Fever'],['mural1','Wall to Wall'],['mural10','Fresco Fanatic'],['cat25','Cat Person'],['vip1','Red Carpet'],['vip10','Royal Treatment']];
+const DAYMS=864e5;
+const earnGate=n=>n<8?7.5e6*Math.pow(2.4,n):7.5e6*Math.pow(2.4,7)*Math.pow(1.5,n-7);
+const fmt=n=>{n=+n||0;if(Math.abs(n)>=1e15)return n.toExponential(2);return Math.round(n).toLocaleString()};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+let S=null,ORIG='',tab='basics';
+const TABS=[['basics','Basics'],['up','Upgrades'],['career','Career'],['stats','Stats'],['ach','Trophies'],['inv','Paintings'],['raw','Raw JSON']];
+
+function decode(txt){
+ txt=txt.trim();if(!txt)throw new Error('Paste your save code first.');
+ let json;
+ if(txt[0]==='{')json=txt;
+ else{try{json=decodeURIComponent(escape(atob(txt.replace(/\s+/g,''))))}catch(e){throw new Error("That doesn't look like a save code. Make sure you copied the whole thing.")}}
+ let o;try{o=JSON.parse(json)}catch(e){throw new Error("The code decoded, but it isn't valid save data.")}
+ if(!o||typeof o.cash!=='number')throw new Error('That doesn\'t look like a Little Gallery save (no "cash" value found).');
+ return o;
+}
+function encode(o){return btoa(unescape(encodeURIComponent(JSON.stringify(o))))}
+function normalize(){
+ S.up=S.up||{};S.st=S.st||{};S.day=S.day||{};
+ if(!Array.isArray(S.inv))S.inv=[];
+ if(!Array.isArray(S.ach))S.ach=[];
+ if(!Array.isArray(S.hang))S.hang=[];
+ while(S.hang.length<8)S.hang.push(null);
+ if(!Array.isArray(S.wing))S.wing=[];
+}
+const get=p=>p.split('.').reduce((o,k)=>o==null?o:o[k],S);
+function set(p,v){const ks=p.split('.');let o=S;for(let i=0;i<ks.length-1;i++)o=o[ks[i]]=o[ks[i]]||{};o[ks[ks.length-1]]=v}
+
+function nf(label,path,max){const v=get(path);return `<label class="f"><span>${label}</span><input type="number" step="any" data-path="${path}" ${max!=null?`data-max="${max}"`:''} value="${v==null?0:v}"></label>`}
+function sel(label,path,opts){const v=get(path)||'';return `<label class="f"><span>${label}</span><select data-spath="${path}">${opts.map(([k,n])=>`<option value="${k}" ${k===v?'selected':''}>${n}</option>`).join('')}</select></label>`}
+
+function renderTabs(){$('#tabs').innerHTML=TABS.map(([k,n])=>`<button class="tab ${k===tab?'on':''}" data-tab="${k}">${n}</button>`).join('')}
+
+function renderPane(){
+ let h='';
+ if(tab==='basics'){
+  h=`<div class="grid">${nf('Funds ($)','cash')}${nf('Earned all-time ($)','lifetime')}${nf('Earned this run ($)','run')}${nf('Brushstrokes','strokes')}${nf('Paintings finished','done')}${nf('Reputation','rep')}${nf('Fame Stars','stars')}${nf('Relocations (city index)','moves')}</div>
+  <div class="note">Current city: <b>${esc(CITIES[(S.moves||0)%CITIES.length])}</b>. Rank thresholds are 25, 100, 300, 800, 2,000, 3,500 and 8,000 reputation.</div>
+  <div class="row"><button class="sm" data-act="cash" data-n="1e6">+$1M</button><button class="sm" data-act="cash" data-n="1e9">+$1B</button><button class="sm" data-act="cash" data-n="1e12">+$1T</button><button class="sm" data-act="cash" data-n="1e15">+$1Q</button></div>`;
+ }
+ else if(tab==='up'){
+  h=`<div class="row" style="margin-top:0"><button class="sm" data-act="maxup">Max all upgrades</button><button class="sm" data-act="zeroup">Zero all upgrades</button></div><div class="note">Levels are capped at the game's own maximums. The last three upgrades only work if you hold the matching specialization.</div><div class="grid">${UPS.map(([k,n,m])=>nf(`${n} (max ${m})`,'up.'+k,m)).join('')}</div>`;
+ }
+ else if(tab==='career'){
+  const gate=earnGate(S.moves||0);
+  h=`<div class="grid">${sel('Specialization','spec',SPECS)}${nf('Daily streak','day.streak')}${nf('Days visited','day.total')}${nf('Streak freezes','day.freeze')}</div>
+  <div class="note">Relocation needs: earnings this run ≥ <b>$${fmt(gate)}</b>, the wing donations, the renovation timer, and (for the final chapter) 40 trophies.</div>
+  <div class="row"><button class="sm" data-act="gate">Meet earnings gate</button><button class="sm" data-act="timer">Skip renovation timer</button><button class="sm" data-act="wing">Complete wing donations</button><button class="sm" data-act="allach">Unlock all trophies</button><button class="sm" data-act="gift">Reset today's gift</button></div>
+  <label class="chk" style="margin-top:8px"><input type="checkbox" id="wonChk" ${S.won?'checked':''}> Grand Retrospective cleared (Endless mode)</label>`;
+ }
+ else if(tab==='stats'){
+  h=`<div class="grid">${ST.map(([k,n])=>nf(n,'st.'+k)).join('')}</div>`;
+ }
+ else if(tab==='ach'){
+  const have=new Set(S.ach);
+  h=`<div class="row" style="margin-top:0"><button class="sm" data-act="allach">Unlock all</button><button class="sm" data-act="noach">Clear all</button><span class="pill">${have.size} unlocked · +${have.size*2}% earnings</span></div>
+  <div class="note">The game re-awards any trophy whose requirement you already meet, so cleared ones may come back by themselves.</div>
+  <div class="trophies">${ACH.map(([id,n])=>`<label class="chk"><input type="checkbox" data-ach="${id}" ${have.has(id)?'checked':''}> ${esc(n)}</label>`).join('')}</div>`;
+ }
+ else if(tab==='inv'){
+  const slotOf=id=>S.hang.indexOf(id);
+  h=`<div class="row" style="margin-top:0"><button class="sm pri" data-act="addp">+ Add painting</button><span class="pill">${S.inv.length} paintings</span></div>
+  <div class="note">Frames 1 to 8 are the gallery slots. A painting can sit in one frame at a time.</div>
+  <div style="overflow-x:auto"><table><tr><th>Title</th><th>Style</th><th>Rarity</th><th>Value ($)</th><th>Frame</th><th></th></tr>
+  ${S.inv.map((p,i)=>`<tr><td><input data-pi="${i}" data-pf="title" value="${esc(p.title||'')}" maxlength="60"></td>
+  <td><select data-pi="${i}" data-pf="style">${STYLES.map(([k,n])=>`<option value="${k}" ${k===p.style?'selected':''}>${n}</option>`).join('')}</select></td>
+  <td><select data-pi="${i}" data-pf="rarity">${RAR.map((n,r)=>`<option value="${r}" ${r===p.rarity?'selected':''}>${n}</option>`).join('')}</select></td>
+  <td><input type="number" step="any" data-pi="${i}" data-pf="value" value="${p.value||0}"></td>
+  <td><select data-pi="${i}" data-pf="frame"><option value="-1">—</option>${[0,1,2,3,4,5,6,7].map(s=>`<option value="${s}" ${slotOf(p.id)===s?'selected':''}>${s+1}</option>`).join('')}</select></td>
+  <td><button class="sm" data-act="delp" data-i="${i}">Delete</button></td></tr>`).join('')}</table></div>
+  ${S.inv.length?'':'<div class="note">No paintings in this save yet.</div>'}`;
+ }
+ else if(tab==='raw'){
+  h=`<div class="note">Advanced: the full save as JSON. Apply your changes before leaving this tab.</div><textarea id="rawBox" rows="16" spellcheck="false">${esc(JSON.stringify(S,null,1))}</textarea><div class="row"><button class="sm pri" data-act="applyraw">Apply JSON</button><span id="rawMsg" class="msg"></span></div>`;
+ }
+ $('#pane').innerHTML=h;
+}
+
+function summary(){
+ $('#sum').innerHTML=[`Save v${S.ver||'?'}`,`$${fmt(S.cash)}`,`${S.done||0} paintings`,`★ ${S.stars||0}`,`${CITIES[(S.moves||0)%CITIES.length]}`,`${(S.ach||[]).length} trophies`].map(t=>`<span class="pill">${esc(t)}</span>`).join('');
+}
+function build(){
+ if(!S)return;
+ let mx=0;for(const p of S.inv)mx=Math.max(mx,+p.id||0);
+ S.nid=Math.max(+S.nid||1,mx+1);
+ const o=JSON.parse(JSON.stringify(S));
+ if($('#optSeen').checked)o.seen=Date.now();
+ $('#out').value=encode(o);
+ summary();
+}
+function refresh(full){if(full){renderTabs();renderPane()}build()}
+
+function load(o){S=o;normalize();ORIG=JSON.stringify(o);$('#editor').classList.remove('hidden');$('#revertBtn').classList.remove('hidden');tab='basics';refresh(true)}
+
+$('#decodeBtn').onclick=()=>{
+ const m=$('#msg');
+ try{load(decode($('#inp').value));m.className='msg ok';m.textContent='Save decoded. Edit below, then copy your new code.'}
+ catch(e){m.className='msg err';m.textContent=e.message}
+};
+$('#revertBtn').onclick=()=>{if(!ORIG)return;S=JSON.parse(ORIG);normalize();refresh(true);const m=$('#msg');m.className='msg ok';m.textContent='All edits reverted.'};
+$('#optSeen').onchange=build;
+
+$('#tabs').addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(b){tab=b.dataset.tab;refresh(true)}});
+
+$('#pane').addEventListener('input',e=>{
+ const t=e.target;
+ if(t.dataset.path){const v=parseFloat(t.value);if(Number.isFinite(v)){set(t.dataset.path,v);build()}}
+ else if(t.dataset.pf==='title'){S.inv[+t.dataset.pi].title=t.value.slice(0,60);build()}
+ else if(t.dataset.pf==='value'){const v=parseFloat(t.value);if(Number.isFinite(v)){S.inv[+t.dataset.pi].value=Math.max(0,Math.round(v));build()}}
+});
+$('#pane').addEventListener('change',e=>{
+ const t=e.target;
+ if(t.dataset.path){let v=parseFloat(t.value);if(!Number.isFinite(v))v=0;v=Math.max(0,v);if(t.dataset.max!=null)v=Math.min(+t.dataset.max,Math.floor(v));set(t.dataset.path,v);t.value=v;build()}
+ else if(t.dataset.spath){const v=t.value;set(t.dataset.spath,v===''?null:v);refresh(true)}
+ else if(t.dataset.ach){const s=new Set(S.ach);t.checked?s.add(t.dataset.ach):s.delete(t.dataset.ach);S.ach=[...s];refresh(true)}
+ else if(t.id==='wonChk'){S.won=t.checked?Date.now():0;build()}
+ else if(t.dataset.pf==='style'){S.inv[+t.dataset.pi].style=t.value;build()}
+ else if(t.dataset.pf==='rarity'){S.inv[+t.dataset.pi].rarity=+t.value;build()}
+ else if(t.dataset.pf==='frame'){
+  const p=S.inv[+t.dataset.pi],slot=+t.value;
+  S.hang=S.hang.map(id=>id===p.id?null:id);
+  if(slot>=0)S.hang[slot]=p.id;
+  refresh(true);
+ }
+});
+$('#pane').addEventListener('click',e=>{
+ const b=e.target.closest('[data-act]');if(!b)return;
+ const a=b.dataset.act;
+ if(a==='cash'){const n=+b.dataset.n;S.cash=(+S.cash||0)+n;S.lifetime=(+S.lifetime||0)+n;S.run=(+S.run||0)+n}
+ else if(a==='maxup'){UPS.forEach(([k,,m])=>S.up[k]=m)}
+ else if(a==='zeroup'){UPS.forEach(([k])=>S.up[k]=0)}
+ else if(a==='gate'){S.run=Math.max(+S.run||0,Math.ceil(earnGate(S.moves||0)));S.lifetime=Math.max(+S.lifetime||0,S.run)}
+ else if(a==='timer'){S.chStart=Date.now()-30*DAYMS}
+ else if(a==='wing'){S.wing=Array(12).fill(99)}
+ else if(a==='allach'){S.ach=ACH.map(x=>x[0])}
+ else if(a==='noach'){S.ach=[]}
+ else if(a==='gift'){S.day.claimed=0}
+ else if(a==='addp'){
+  let mx=0;for(const p of S.inv)mx=Math.max(mx,+p.id||0);
+  const id=Math.max(+S.nid||1,mx+1);S.nid=id+1;
+  S.inv.push({id,seed:Math.floor(Math.random()*1e9),style:'sunrise',rarity:4,title:'Edited Masterpiece',value:100000});
+ }
+ else if(a==='delp'){
+  const p=S.inv[+b.dataset.i];if(!p)return;
+  S.inv.splice(+b.dataset.i,1);
+  S.hang=S.hang.map(id=>id===p.id?null:id);
+  if(Array.isArray(S.offers))S.offers=S.offers.filter(o=>o.pid!==p.id);
+ }
+ else if(a==='applyraw'){
+  const m=$('#rawMsg');
+  try{const o=JSON.parse($('#rawBox').value);if(!o||typeof o.cash!=='number')throw new Error('Missing "cash" number.');S=o;normalize();m.className='msg ok';m.textContent='Applied.';build();return}
+  catch(err){m.className='msg err';m.textContent='Invalid JSON: '+err.message;return}
+ }
+ refresh(true);
+});
+
+$('#copyBtn').onclick=async()=>{
+ const t=$('#out'),m=$('#copyMsg');
+ try{await navigator.clipboard.writeText(t.value);m.className='msg ok';m.textContent='Copied!'}
+ catch(e){t.focus();t.select();try{document.execCommand('copy');m.className='msg ok';m.textContent='Copied!'}catch(_){m.className='msg err';m.textContent='Select the code above and copy it manually.'}}
+};
+</script>
+</body>
+</html>
