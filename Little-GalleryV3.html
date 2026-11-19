@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Little Gallery — Idle Art Studio</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap');
+:root{--ink:#25231f;--muted:#878176;--paper:#f5f0e7;--gold:#e5b95e;--coral:#e98169;--mint:#9ec5a3}*{box-sizing:border-box}body{margin:0;background:#eee8dd;color:var(--ink);font-family:'DM Sans',sans-serif;overflow:hidden}.app{height:100vh;min-height:640px;display:grid;grid-template-columns:310px 1fr}.sidebar{background:#fbf8f2;padding:27px 24px;display:flex;flex-direction:column;z-index:2;box-shadow:8px 0 30px #29231a12;overflow-y:auto}.brand{display:flex;align-items:center;gap:12px;margin-bottom:32px}.brand-icon{width:42px;height:42px;border-radius:14px;background:#282722;color:#f6cb75;display:grid;place-items:center;font-size:23px}.brand h1{font:700 20px 'Playfair Display',serif;margin:0}.brand small{display:block;color:var(--muted);font-size:11px;margin-top:3px;letter-spacing:.07em;text-transform:uppercase}.wallet{padding:17px 18px;background:#f1ece2;border-radius:16px;margin-bottom:24px}.wallet-label,.section-label{font:500 10px 'DM Mono',monospace;text-transform:uppercase;letter-spacing:.13em;color:var(--muted)}.cash{font:700 29px 'Playfair Display',serif;margin:5px 0 2px}.rate{font-size:12px;color:#658768}.section-head{display:flex;justify-content:space-between;align-items:center;margin:3px 0 11px}.section-head b{font-size:13px}.level-pill{font:11px 'DM Mono',monospace;background:#ede5d7;padding:5px 8px;border-radius:20px}.upgrade{position:relative;width:100%;border:1px solid #e8e1d6;background:#fffdfa;border-radius:13px;padding:13px;text-align:left;display:flex;gap:11px;align-items:center;margin-bottom:9px;color:var(--ink);cursor:pointer;transition:.18s}.upgrade:hover:not(:disabled){transform:translateY(-2px);border-color:#d6bd8b;box-shadow:0 6px 16px #33231110}.upgrade:disabled{opacity:.48;cursor:not-allowed}.up-icon{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;font-size:19px;background:#f6e8ca;flex:none}.upgrade:nth-of-type(2) .up-icon{background:#e8eee1}.upgrade:nth-of-type(3) .up-icon{background:#f5e1dc}.upgrade-copy{flex:1;min-width:0}.upgrade-copy strong{display:block;font-size:12px}.upgrade-copy small{color:var(--muted);font-size:10px;display:block;margin-top:3px}.up-cost{font:11px 'DM Mono',monospace;white-space:nowrap;color:#977333}.spacer{flex:1;min-height:20px}.daily{background:#292822;color:#f9f4e9;border-radius:15px;padding:15px 16px;margin-top:17px}.daily-top{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:600}.daily-top span{color:#f1c96e}.daily p{font-size:11px;color:#c5c0b3;margin:7px 0 10px}.progress{height:5px;border-radius:8px;background:#ffffff25;overflow:hidden}.progress i{display:block;height:100%;width:0;background:#e8bf68;border-radius:8px;transition:width .3s}.daily small{display:block;text-align:right;font:10px 'DM Mono',monospace;color:#d7cba8;margin-top:7px}.reset{margin-top:14px;border:0;background:none;color:#aaa397;font-size:10px;cursor:pointer;text-decoration:underline;text-underline-offset:3px;align-self:flex-start}.main{position:relative;overflow:hidden;background:#d8d1c4}.scene{position:absolute;inset:0}.scene canvas{display:block;width:100%;height:100%}.topbar{position:absolute;top:24px;left:28px;right:28px;display:flex;justify-content:space-between;align-items:center;pointer-events:none}.location{background:#fbf8f0e8;backdrop-filter:blur(8px);padding:11px 15px;border-radius:12px;box-shadow:0 5px 20px #30271a12}.location b{font:600 13px 'Playfair Display',serif}.location small{display:block;color:var(--muted);font-size:10px;margin-top:2px}.sound{pointer-events:auto;border:0;background:#fbf8f0e8;border-radius:50%;width:40px;height:40px;font-size:16px;cursor:pointer}.hint{position:absolute;bottom:25px;left:50%;transform:translateX(-50%);background:#292822df;color:#fff8e9;border-radius:30px;padding:10px 16px;font-size:11px;white-space:nowrap;box-shadow:0 5px 18px #241a1830}.hint b{color:#f2c86e}.toast{position:absolute;top:88px;left:50%;transform:translate(-50%,-10px);background:#292822;color:white;padding:10px 15px;border-radius:10px;font-size:12px;opacity:0;transition:.25s;pointer-events:none}.toast.show{opacity:1;transform:translate(-50%,0)}.pop{position:absolute;pointer-events:none;color:#fff3c1;font:700 16px 'DM Mono',monospace;text-shadow:0 2px 6px #30231c;animation:float .9s ease-out forwards}@keyframes float{to{transform:translateY(-45px);opacity:0}}.loading{position:absolute;inset:0;display:grid;place-items:center;background:#d8d1c4;font:14px 'DM Sans',sans-serif;color:#665d50;z-index:5;transition:opacity .5s}.loading.done{opacity:0;pointer-events:none}
+
+/* ---------- Achievements ---------- */
+.top-actions{display:flex;gap:10px;align-items:center;pointer-events:auto}
+.trophy-btn{position:relative;border:0;background:#fbf8f0e8;border-radius:22px;height:40px;padding:0 15px 0 12px;display:flex;align-items:center;gap:7px;font:600 12px 'DM Sans',sans-serif;cursor:pointer;color:var(--ink);transition:.18s;box-shadow:0 5px 20px #30271a12}
+.trophy-btn:hover{transform:translateY(-2px);background:#fff}
+.trophy-btn .count{font:500 11px 'DM Mono',monospace;color:#977333}
+.trophy-btn .dot{position:absolute;top:-2px;right:-2px;width:12px;height:12px;border-radius:50%;background:var(--coral);border:2px solid #fbf8f0;display:none}
+.trophy-btn.new .dot{display:block;animation:pulse 1.4s infinite}
+@keyframes pulse{50%{transform:scale(1.35)}}
+.ach-toast{position:absolute;top:84px;right:28px;z-index:7;display:flex;gap:14px;align-items:center;background:#292822;color:#fff8e9;padding:12px 20px 12px 12px;border-radius:18px;box-shadow:0 14px 40px #1c150d55;transform:translateX(calc(100% + 40px));transition:transform .5s cubic-bezier(.2,1.2,.3,1);pointer-events:none;max-width:340px;border:1px solid #f2c86e55}
+.ach-toast.show{transform:none}
+.ach-toast .at-art{width:54px;flex:none;filter:drop-shadow(0 4px 8px #0006)}
+.ach-toast.show .at-art{animation:wobble 1s .3s ease-out}
+@keyframes wobble{0%{transform:scale(.4) rotate(-20deg)}50%{transform:scale(1.25) rotate(8deg)}100%{transform:none}}
+.ach-toast svg{display:block;width:100%;height:auto}
+.ach-toast small{display:block;font:500 9px 'DM Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:#f2c86e;margin-bottom:3px}
+.ach-toast b{display:block;font:700 16px 'Playfair Display',serif}
+.ach-toast span{display:block;font-size:11px;color:#c9c3b4;margin-top:3px}
+.cabinet{position:absolute;inset:0;background:#25231f66;backdrop-filter:blur(6px);display:grid;place-items:center;z-index:8;opacity:0;pointer-events:none;transition:opacity .25s}
+.cabinet.open{opacity:1;pointer-events:auto}
+.cab-panel{width:min(900px,92%);max-height:88%;background:#fbf8f2;border-radius:24px;padding:24px 26px 22px;display:flex;flex-direction:column;box-shadow:0 30px 80px #1c150d55;transform:translateY(16px) scale(.97);transition:transform .3s cubic-bezier(.2,1.1,.3,1)}
+.cabinet.open .cab-panel{transform:none}
+.cab-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:14px}
+.cab-head h2{font:700 24px 'Playfair Display',serif;margin:0}
+.cab-head p{margin:4px 0 0;font-size:12px;color:var(--muted)}
+.cab-close{border:0;background:#eee6d8;width:34px;height:34px;border-radius:50%;font-size:16px;cursor:pointer;flex:none;color:var(--ink)}
+.cab-close:hover{background:#e2d7c2}
+.cab-meter{display:flex;align-items:center;gap:12px;margin-bottom:16px;background:#f1ece2;border-radius:14px;padding:11px 14px}
+.cab-meter .num{font:700 18px 'Playfair Display',serif;white-space:nowrap}
+.cab-meter .track{flex:1;height:7px;border-radius:6px;background:#ddd3c0;overflow:hidden}
+.cab-meter .track i{display:block;height:100%;width:0;background:linear-gradient(90deg,#e5b95e,#e98169);border-radius:6px;transition:width .5s}
+.cab-meter .bonus{font:500 11px 'DM Mono',monospace;color:#658768;white-space:nowrap}
+.cab-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(188px,1fr));gap:12px;overflow-y:auto;padding:2px}
+.card{position:relative;background:#fffdfa;border:1px solid #e8e1d6;border-radius:18px;padding:16px 12px 14px;text-align:center;display:flex;flex-direction:column;align-items:center}
+.card svg{width:78px;height:auto;display:block;margin-bottom:9px;transition:.3s}
+.card.got{background:linear-gradient(#fffaf0,#fff4dc);border-color:#e6cf9a}
+.card.got:hover svg{transform:translateY(-3px) rotate(-3deg) scale(1.06)}
+.card.locked svg{filter:grayscale(1) brightness(.78) contrast(.7);opacity:.42}
+.card.locked::after{content:'🔒';position:absolute;top:10px;right:12px;font-size:12px;opacity:.55}
+.card b{font:700 14px 'Playfair Display',serif}
+.card p{font-size:11px;color:var(--muted);margin:5px 0 10px;line-height:1.4;flex:1}
+.card .tier{font:500 9px 'DM Mono',monospace;letter-spacing:.11em;text-transform:uppercase;color:#977333;background:#f6e8ca;padding:4px 9px;border-radius:12px}
+.card .bar{width:100%;height:5px;border-radius:5px;background:#ece4d4;overflow:hidden}
+.card .bar i{display:block;height:100%;background:#c9b185;border-radius:5px}
+.card .prog{font:10px 'DM Mono',monospace;color:var(--muted);margin-top:6px}
+@media(max-width:760px){.app{grid-template-columns:1fr;grid-template-rows:auto 1fr;height:100dvh;min-height:0}.sidebar{padding:14px 16px;display:grid;grid-template-columns:1fr 1fr;gap:9px;overflow:visible}.brand{grid-column:1;margin:0}.brand-icon{width:36px;height:36px}.brand h1{font-size:17px}.wallet{grid-column:2;grid-row:1;margin:0;padding:9px 12px}.cash{font-size:22px;margin:0}.wallet-label{font-size:8px}.rate{font-size:10px}.section-head{grid-column:1/-1;margin:2px 0 0}.upgrade{margin:0;padding:9px;gap:7px}.up-icon{width:30px;height:30px;font-size:15px}.upgrade-copy strong{font-size:10px}.upgrade-copy small{font-size:9px}.up-cost{font-size:9px}.daily,.spacer,.reset{display:none}.main{min-height:0}.topbar{top:12px;left:12px;right:12px}.hint{bottom:15px;font-size:10px}
+ .trophy-btn .label{display:none}.ach-toast{right:12px;top:66px;max-width:calc(100% - 24px)}.cab-panel{padding:18px 16px}.cab-grid{grid-template-columns:repeat(2,1fr)}.cab-meter .bonus{display:none}}
+</style>
+</head>
+<body>
+<div class="app">
+ <aside class="sidebar">
+  <div class="brand"><div class="brand-icon">✳</div><div><h1>Little Gallery</h1><small>Your tiny art empire</small></div></div>
+  <div class="wallet"><div class="wallet-label">Gallery funds</div><div class="cash" id="cash">$0</div><div class="rate">↗ <span id="rate">$0</span> / second</div></div>
+  <div class="section-head"><b>Studio upgrades</b><span class="level-pill" id="level">LVL 1</span></div>
+  <button class="upgrade" id="brush"><span class="up-icon">🖌️</span><span class="upgrade-copy"><strong>Better brushes</strong><small>More value per stroke · Lv <i>0</i></small></span><span class="up-cost">$<span>15</span></span></button>
+  <button class="upgrade" id="assistant"><span class="up-icon">🧑‍🎨</span><span class="upgrade-copy"><strong>Hire an artist</strong><small>Paintings earn while you rest · Lv <i>0</i></small></span><span class="up-cost">$<span>50</span></span></button>
+  <button class="upgrade" id="room"><span class="up-icon">🖼️</span><span class="upgrade-copy"><strong>Expand the gallery</strong><small>More visitors, more tips · Lv <i>0</i></small></span><span class="up-cost">$<span>120</span></span></button>
+  <div class="spacer"></div>
+  <div class="daily"><div class="daily-top">Today's little goal <span>✦</span></div><p>Make 30 brushstrokes and earn a sweet bonus.</p><div class="progress"><i id="progress"></i></div><small><span id="strokes">0</span> / 30 strokes</small></div>
+  <button class="reset" id="reset">Start a fresh canvas</button>
+ </aside>
+ <main class="main"><div class="scene" id="scene"></div>
+  <div class="topbar"><div class="location"><b>The Sunroom</b><small>Open daily · Est. just now</small></div>
+   <div class="top-actions"><button class="trophy-btn" id="trophy" aria-label="Open trophy cabinet"><span>🏆</span><span class="label">Trophies</span><span class="count" id="trophyCount">0/12</span><i class="dot"></i></button><button class="sound" id="sound" aria-label="Toggle sound">♫</button></div></div>
+  <div class="hint">Click the canvas to paint <b>·</b> Each stroke earns <b id="tapval">$1</b></div><div class="toast" id="toast"></div><div class="ach-toast" id="achToast"></div>
+  <div class="cabinet" id="cabinet"><div class="cab-panel">
+   <div class="cab-head"><div><h2>Trophy Cabinet</h2><p>Every trophy you earn is hung in the gallery and sweetens all your earnings.</p></div><button class="cab-close" id="cabClose" aria-label="Close">✕</button></div>
+   <div class="cab-meter"><span class="num" id="cabCount">0 / 12</span><div class="track"><i id="cabBar"></i></div><span class="bonus" id="cabBonus">+0% to all earnings</span></div>
+   <div class="cab-grid" id="cabGrid"></div>
+  </div></div>
+  <div class="loading" id="loading">Setting up your little gallery…</div>
+ </main>
+</div>
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+const $=s=>document.querySelector(s), sceneEl=$('#scene');
+let money=0,total=0,strokes=0,brush=0,assist=0,room=0,painted=0,soundOn=true;
+const saved=JSON.parse(localStorage.getItem('littleGallery')||'{}');
+money=saved.money||0;total=saved.total||money;strokes=saved.strokes||0;brush=saved.brush||0;assist=saved.assist||0;room=saved.room||0;painted=saved.painted||0;
+const got=new Set(saved.ach||[]);
+const fmt=n=>(Math.round(n*100)/100).toLocaleString();
+
+/* ================= ACHIEVEMENT ART =================
+   Every medal is hand-built SVG: a tiered medal + ribbon with a unique emblem. */
+const TIER={
+ bronze:{ring:'#c98b5a',dark:'#9b6540',ribbon:'#e98169',label:'Bronze'},
+ silver:{ring:'#cfd4d8',dark:'#98a0a8',ribbon:'#7fae9c',label:'Silver'},
+ gold:{ring:'#f1c966',dark:'#c28f2c',ribbon:'#c9574e',label:'Gold'}};
+const sp=(x,y,s,f='#fff')=>`<path transform="translate(${x} ${y}) scale(${s})" d="M0 -5L1.5 -1.5L5 0L1.5 1.5L0 5L-1.5 1.5L-5 0L-1.5 -1.5Z" fill="${f}"/>`;
+const fig=(x,y,s,c,b)=>`<g transform="translate(${x} ${y}) scale(${s})"><path d="M-7 16Q-7 2 0 2Q7 2 7 16Z" fill="${c}"/><circle cy="-4" r="6" fill="#f1cfa8"/><path d="M-7 -6Q-6 -13 2 -12Q8 -11 7 -6Q0 -8 -7 -6Z" fill="${b}"/><circle cx="2" cy="-13" r="1.6" fill="${b}"/></g>`;
+const brushArt=(handle,bristle,ferrule)=>`<rect x="-3" y="-18" width="6" height="14" rx="3" fill="${handle}"/><rect x="-5" y="-5" width="10" height="7" rx="1" fill="${ferrule}"/><path d="M-5 2Q-9 13 0 19Q9 13 5 2Z" fill="${bristle}"/><ellipse cx="0" cy="19.5" rx="9" ry="2.2" fill="#e98169" opacity=".65"/>`;
+const GLYPH={
+ first:()=>`<g transform="rotate(40)"><rect x="-2.5" y="-18" width="5" height="22" rx="2.5" fill="#b78452"/><rect x="-3.4" y="3" width="6.8" height="5" fill="#cfd2d6"/><path d="M-3.4 8Q-5.5 18 0 21Q5.5 18 3.4 8Z" fill="#e98169"/></g><circle cx="11" cy="12" r="3.2" fill="#9ec5a3"/><circle cx="14" cy="5" r="1.8" fill="#e5b95e"/>`,
+ daily:()=>`<g transform="translate(0 8)"><path d="M-12 0A12 12 0 0 1 12 0Z" fill="#e5b95e"/><g stroke="#e98169" stroke-width="2.5" stroke-linecap="round"><path d="M0 -16V-20"/><path d="M0 -16V-20" transform="rotate(-40)"/><path d="M0 -16V-20" transform="rotate(40)"/><path d="M0 -16V-20" transform="rotate(-72)"/><path d="M0 -16V-20" transform="rotate(72)"/></g><path d="M-18 1H18" stroke="#658768" stroke-width="2" stroke-linecap="round"/><path d="M-12 6H12M-7 11H7" stroke="#9ec5a3" stroke-width="2" stroke-linecap="round"/></g>`,
+ steady:()=>`<path d="M-17 2C-17 -10 -7 -17 3 -16C14 -15 19 -7 17 1C15 8 8 5 6 9C4 15 -3 17 -9 14C-15 11 -17 7 -17 2Z" fill="#e8cf9e" stroke="#8c6847" stroke-width="1.6"/><circle cx="8" cy="7" r="2.6" fill="#fff6e2" stroke="#8c6847" stroke-width="1.2"/><circle cx="-8" cy="-4" r="3.4" fill="#e98169"/><circle cx="0" cy="-9" r="3.4" fill="#8197c5"/><circle cx="9" cy="-6" r="3.4" fill="#698f82"/><circle cx="-11" cy="6" r="3" fill="#544b65"/>`,
+ marathon:()=>`<g stroke="#6a5140" stroke-width="1.5"><rect x="-17" y="-12" width="18" height="24" rx="1.5" fill="#8db6a0" transform="rotate(-12)"/><rect x="-1" y="-14" width="18" height="24" rx="1.5" fill="#ed9a76" transform="rotate(10)"/><rect x="-9" y="-16" width="18" height="24" rx="1.5" fill="#f5e6c4"/></g><circle cx="3" cy="-8" r="3" fill="#e5b95e"/><path d="M-9 8L-3 -1L2 5L5 1L9 8Z" fill="#467b78"/>${sp(15,-14,.9,'#e98169')}`,
+ coin100:()=>`<circle r="15" fill="#e5b95e" stroke="#977333" stroke-width="2"/><circle r="11" fill="none" stroke="#c28f2c" stroke-width="1.5" stroke-dasharray="2.4 2"/><text y="6.5" text-anchor="middle" font-family="Georgia,serif" font-weight="700" font-size="18" fill="#977333">$</text><path d="M-9 -6A10 10 0 0 1 -3 -10" stroke="#fff" stroke-opacity=".7" stroke-width="2" stroke-linecap="round" fill="none"/>`,
+ coin1k:()=>[11,4,-3,-10].map(y=>`<rect x="-14" y="${y}" width="28" height="7" fill="#d4a444"/><ellipse cy="${y+7}" rx="14" ry="4.5" fill="#d4a444"/><ellipse cy="${y}" rx="14" ry="4.5" fill="#f1c966" stroke="#977333" stroke-width="1.2"/>`).join('')+sp(15,-13,1,'#e98169')+sp(-15,-9,.6,'#fff'),
+ coin10k:()=>`<path d="M-16 10L-18 -10L-8 -2L0 -14L8 -2L18 -10L16 10Z" fill="#e5b95e" stroke="#977333" stroke-width="1.6" stroke-linejoin="round"/><rect x="-16" y="10" width="32" height="5.5" rx="1.5" fill="#c28f2c" stroke="#977333" stroke-width="1.2"/><circle cx="0" cy="3" r="3" fill="#e98169"/><circle cx="-9" cy="5" r="2.2" fill="#9ec5a3"/><circle cx="9" cy="5" r="2.2" fill="#8197c5"/><circle cx="-18" cy="-11" r="2.4" fill="#e98169"/><circle cx="0" cy="-15" r="2.4" fill="#e98169"/><circle cx="18" cy="-11" r="2.4" fill="#e98169"/>`,
+ brush1:()=>brushArt('#b78452','#698f82','#cfd2d6'),
+ brush5:()=>brushArt('#e5b95e','#f1c966','#c28f2c')+sp(-13,-8,1.2,'#e98169')+sp(13,-4,.9,'#8197c5')+sp(11,-15,.7,'#9ec5a3'),
+ assist3:()=>fig(-12,4,.8,'#8197c5','#e98169')+fig(12,4,.8,'#9ec5a3','#544b65')+fig(0,2,1,'#e98169','#e5b95e'),
+ room1:()=>`<path d="M-18 -14Q0 -4 18 -14" stroke="#6a5140" stroke-width="1.4" fill="none"/><path d="M-16.1 -11.8L-9.1 -11.2L-12.6 -2.4Z" fill="#e98169"/><path d="M-7.8 -9.9L-0.8 -9.3L-4.3 -.3Z" fill="#e5b95e"/><path d="M0.8 -9.3L7.8 -9.9L4.3 -.3Z" fill="#9ec5a3"/><path d="M9.1 -11.2L16.1 -11.8L12.6 -2.4Z" fill="#8197c5"/><rect x="-11" y="3" width="22" height="16" rx="1" fill="#e5b95e" stroke="#977333" stroke-width="1.4"/><rect x="-8" y="6" width="16" height="10" fill="#a8c7c2"/><circle cx="3" cy="9.5" r="2" fill="#f5e6c4"/><path d="M-8 16L-3 11L1 14L4 12L8 16Z" fill="#467b78"/>`,
+ room3:()=>`<path d="M-18 -6L0 -17L18 -6Z" fill="#c5ad8f" stroke="#6a5140" stroke-width="1.4" stroke-linejoin="round"/><circle cy="-9.5" r="2.2" fill="#fff6e2" stroke="#6a5140" stroke-width="1"/>${[-13,-5,3,11].map(x=>`<rect x="${x}" y="-4" width="4" height="14" fill="#f5f0e7" stroke="#6a5140" stroke-width="1"/>`).join('')}<rect x="-18" y="10" width="36" height="3.5" fill="#d7c8b3" stroke="#6a5140" stroke-width="1"/><rect x="-20.5" y="13.5" width="41" height="3.5" fill="#c5ad8f" stroke="#6a5140" stroke-width="1"/>${sp(16,-14,.9,'#e98169')}`
+};
+function badge(a){
+ const t=TIER[a.tier];
+ return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 96" width="160" height="192">
+ <path d="M23 54L16 91L31 82L39 60Z" fill="${t.ribbon}"/><path d="M57 54L64 91L49 82L41 60Z" fill="${t.ribbon}"/>
+ <path d="M23 54L16 91L31 82L35 69Z" fill="#0000001c"/><path d="M57 54L64 91L49 82L45 69Z" fill="#0000001c"/>
+ <circle cx="40" cy="38" r="31" fill="${t.dark}"/><circle cx="40" cy="38" r="29" fill="${t.ring}"/>
+ <circle cx="40" cy="38" r="23" fill="#fff6e2" stroke="${t.dark}" stroke-width="1.5"/>
+ <path d="M15.6 29.1A26 26 0 0 1 31.1 13.6" stroke="#fff" stroke-opacity=".65" stroke-width="3" stroke-linecap="round" fill="none"/>
+ <g transform="translate(40 38) scale(.95)">${GLYPH[a.id]()}</g></svg>`;
+}
+
+const ACH=[
+ {id:'first',   name:'First Stroke',      desc:'Make your very first brushstroke.',         tier:'bronze',goal:1,    val:()=>strokes},
+ {id:'daily',   name:'Daily Dabbler',     desc:'Complete 30 brushstrokes.',                 tier:'bronze',goal:30,   val:()=>strokes},
+ {id:'steady',  name:'Steady Hand',       desc:'Make 150 brushstrokes.',                    tier:'silver',goal:150,  val:()=>strokes},
+ {id:'marathon',name:'Marathon Painter',  desc:'Make 600 brushstrokes. Your wrist is a legend.',tier:'gold',goal:600,val:()=>strokes},
+ {id:'coin100', name:'Pocket Change',     desc:'Earn $100 in total.',                       tier:'bronze',goal:100,  val:()=>total,money:1},
+ {id:'coin1k',  name:'Rising Patron',     desc:'Earn $1,000 in total.',                     tier:'silver',goal:1000, val:()=>total,money:1},
+ {id:'coin10k', name:'Gallery Mogul',     desc:'Earn $10,000 in total.',                    tier:'gold',  goal:10000,val:()=>total,money:1},
+ {id:'brush1',  name:'Fine Bristles',     desc:'Buy your first brush upgrade.',             tier:'bronze',goal:1,    val:()=>brush},
+ {id:'brush5',  name:'Master Brushwork',  desc:'Bring Better Brushes to level 5.',          tier:'silver',goal:5,    val:()=>brush},
+ {id:'assist3', name:'Studio Family',     desc:'Hire 3 artists for the studio.',            tier:'silver',goal:3,    val:()=>assist},
+ {id:'room1',   name:'Grand Opening',     desc:'Expand the gallery for the first time.',    tier:'bronze',goal:1,    val:()=>room},
+ {id:'room3',   name:'Museum Wing',       desc:'Expand the gallery 3 times.',               tier:'gold',  goal:3,    val:()=>room}
+];
+const mult=()=>1+.02*got.size, tapVal=()=>(1+brush*2)*mult();
+
+const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;sceneEl.appendChild(renderer.domElement);
+const scene=new THREE.Scene();scene.background=new THREE.Color('#d8d1c4');scene.fog=new THREE.Fog('#d8d1c4',13,27);
+const camera=new THREE.PerspectiveCamera(42,1,.1,100);camera.position.set(0,2.4,10.6);camera.lookAt(0,1.9,0);
+scene.add(new THREE.HemisphereLight('#fff5df','#777064',2));const sun=new THREE.DirectionalLight('#fff1d2',3.2);sun.position.set(-4,8,6);sun.castShadow=true;scene.add(sun);
+const mat=(color,rough=.8)=>new THREE.MeshStandardMaterial({color,roughness:rough});
+function box(w,h,d,m,x,y,z,sh=true){let o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.castShadow=sh;o.receiveShadow=true;scene.add(o);return o}
+// Warm little room
+box(18,.2,16,mat('#9a8065'),0,-.12,0);box(18,9,.2,mat('#e9dfcf'),0,4.4,-3.6);box(.2,9,16,mat('#e5dac9'),-8.9,4.4,4.4);box(.2,9,16,mat('#e5dac9'),8.9,4.4,4.4);box(18,.2,16,mat('#d7c8b3'),0,8.9,0);
+// floorboards
+for(let z=-7;z<8;z+=1.3)box(17.8,.025,.018,mat('#806b56'),0,.005,z,false);
+// wall trim
+box(18,.18,.12,mat('#c5ad8f'),0,.35,-3.43);box(18,.18,.12,mat('#c5ad8f'),0,8.1,-3.43);
+// windows
+for(let x of [-5.7,5.7]){box(2.35,3.8,.12,mat('#b88965'),x,4.8,-3.43);box(2.05,3.48,.08,mat('#a8c7c2',.3),x,4.82,-3.34);box(.09,3.5,.04,mat('#f3e5cb'),x,4.82,-3.26);box(2.1,.09,.04,mat('#f3e5cb'),x,4.82,-3.25);box(2.55,.13,.35,mat('#c0946c'),x,2.82,-3.22)}
+// canvases with generated painterly texture
+const artColors=[['#ed9a76','#efc66c','#467b78','#544b65'],['#8db6a0','#e3c18c','#d9846d','#353d3c'],['#8795ba','#edb988','#c46b61','#e8d8ae'],['#d98970','#f0c75d','#608e83','#5d4b68'],['#88aeb1','#e6d2a4','#c77c61','#4c566a']];
+let canvases=[];
+function textureArt(seed){let c=document.createElement('canvas');c.width=240;c.height=300;let g=c.getContext('2d'),colors=artColors[seed%artColors.length];g.fillStyle=colors[0];g.fillRect(0,0,240,300);for(let i=0;i<20;i++){g.globalAlpha=.16;g.fillStyle=colors[i%4];g.beginPath();g.ellipse(Math.random()*240,Math.random()*300,20+Math.random()*80,15+Math.random()*55,Math.random()*3,0,7);g.fill()}g.globalAlpha=1;
+// abstract sun and hills
+g.fillStyle=colors[1];g.beginPath();g.arc(166,82,35+seed%3*5,0,7);g.fill();g.fillStyle=colors[2];g.beginPath();g.moveTo(0,205);g.quadraticCurveTo(55,125,115,208);g.quadraticCurveTo(180,120,240,190);g.lineTo(240,300);g.lineTo(0,300);g.fill();g.fillStyle=colors[3];g.beginPath();g.moveTo(0,246);g.quadraticCurveTo(95,180,156,246);g.quadraticCurveTo(200,206,240,230);g.lineTo(240,300);g.lineTo(0,300);g.fill();for(let i=0;i<16;i++){g.strokeStyle=colors[i%4];g.globalAlpha=.4;g.lineWidth=2;g.beginPath();let x=Math.random()*240,y=Math.random()*300;g.moveTo(x,y);g.lineTo(x+Math.random()*20-10,y+Math.random()*13);g.stroke()}g.globalAlpha=1;let t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return t}
+const frames=[];
+function addFrame(x,y,idx){let frame=box(1.65,2.12,.16,mat(['#b7834e','#443a30','#c7a86f'][idx%3]),x,y,-3.32);let canvas=new THREE.Mesh(new THREE.PlaneGeometry(1.4,1.84),new THREE.MeshBasicMaterial({map:textureArt(idx)}));canvas.position.set(x,y,-3.22);canvas.userData.isCanvas=true;canvas.userData.id=idx;scene.add(canvas);frames.push(canvas);let top=box(1.67,.055,.18,mat('#d7bd91'),x,y+1.08,-3.21,false);let bottom=box(1.67,.055,.18,mat('#d7bd91'),x,y-1.08,-3.21,false);frames.push(frame,top,bottom)}
+addFrame(-2.2,5.55,0);addFrame(0,5.55,1);addFrame(2.2,5.55,2);addFrame(-2.2,2.9,3);addFrame(2.2,2.9,4);
+// gallery bench, easel, plant
+box(2.7,.18,.7,mat('#6a5140'),0,.75,-.4);for(let x of [-1,1])box(.13,.75,.55,mat('#574434'),x,.36,-.4);box(1.15,.12,.8,mat('#a5764f'),-4,.08,1.1);for(let i=0;i<6;i++){let h=.35+Math.random()*.55;let leaf=new THREE.Mesh(new THREE.ConeGeometry(.12,h,5),mat(['#66846a','#7f9870','#526e5a'][i%3]));leaf.position.set(-4+(Math.random()-.5)*.55,.25+h/2,1.1+(Math.random()-.5)*.45);leaf.rotation.z=(Math.random()-.5)*.5;scene.add(leaf)}
+// floating easel and blank interactive canvas
+box(1.15,.11,.5,mat('#8c6847'),0,.08,2.2);for(let x of [-.42,.42]){let leg=box(.07,2,.07,mat('#916e4b'),x,1,2.35);leg.rotation.z=x*.12}let easel=box(1.15,1.52,.1,mat('#b78452'),0,2.35,2.04);let blank=new THREE.Mesh(new THREE.PlaneGeometry(1,1.37),new THREE.MeshBasicMaterial({color:'#fffaf0'}));blank.position.set(0,2.35,1.97);blank.userData.isCanvas=true;blank.userData.id=5;scene.add(blank);frames.push(blank);
+// brush prop
+let brushMesh=new THREE.Mesh(new THREE.CylinderGeometry(.035,.035,.9,8),mat('#b88956'));brushMesh.position.set(.9,.35,2.5);brushMesh.rotation.z=-.55;scene.add(brushMesh);
+
+// ---- Trophy shelves: medals hang on the walls, dark silhouettes until earned ----
+const medals={};
+function badgeTexture(a){const c=document.createElement('canvas');c.width=160;c.height=192;const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;tex.anisotropy=4;const img=new Image();img.onload=()=>{c.getContext('2d').drawImage(img,0,0,160,192);tex.needsUpdate=true};img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(badge(a));return tex}
+for(const side of [-1,1])for(const py of [1.7,.65])box(2.1,.07,.3,mat('#a5764f'),side*5.7,py,-3.25);
+ACH.forEach((a,i)=>{
+ const side=i<6?-1:1,j=i%6,row=Math.floor(j/3),col=j%3;
+ const m=new THREE.Mesh(new THREE.PlaneGeometry(.5,.6),new THREE.MeshBasicMaterial({map:badgeTexture(a),transparent:true,color:'#2f2b26',opacity:.3}));
+ m.position.set(side*5.7+(col-1)*.64,(row?.65:1.7)+.035+.3,-3.08);m.userData.base=m.position.y;
+ scene.add(m);medals[a.id]=m;
+});
+function syncMedals(){for(const a of ACH){const m=medals[a.id],on=got.has(a.id);m.material.color.set(on?'#ffffff':'#2f2b26');m.material.opacity=on?1:.3}}
+function popMedal(id){const m=medals[id];if(m)m.userData.t0=performance.now()}
+
+const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2();let hover=null;
+function resize(){let w=sceneEl.clientWidth,h=sceneEl.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}window.addEventListener('resize',resize);resize();
+function paint(e){let r=renderer.domElement.getBoundingClientRect();pointer.x=(e.clientX-r.left)/r.width*2-1;pointer.y=-((e.clientY-r.top)/r.height)*2+1;raycaster.setFromCamera(pointer,camera);let hit=raycaster.intersectObjects(frames.filter(o=>o.userData.isCanvas),false)[0];if(hit){const v=tapVal();strokes++;money+=v;total+=v;painted++;if(hit.object===blank){let colors=['#e87f67','#eabb55','#698f82','#8197c5','#c77d9e'];blank.material.color.set(colors[Math.floor(Math.random()*colors.length)]);blank.material.needsUpdate=true;blank.scale.setScalar(1+Math.random()*.018)}if(strokes===30){money+=25;total+=25;toast('Daily goal complete! +$25 ✨')}const p=hit.point.clone().project(camera),rect=renderer.domElement.getBoundingClientRect(),el=document.createElement('div');el.className='pop';el.textContent='+$'+fmt(v);el.style.left=(rect.left+((p.x+1)/2)*rect.width-20)+'px';el.style.top=(rect.top+((1-p.y)/2)*rect.height-18)+'px';document.body.appendChild(el);setTimeout(()=>el.remove(),900);refresh();if(soundOn)beep();}}
+renderer.domElement.addEventListener('pointerdown',paint);renderer.domElement.addEventListener('pointermove',e=>{let r=renderer.domElement.getBoundingClientRect();pointer.set((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1);raycaster.setFromCamera(pointer,camera);let h=raycaster.intersectObjects(frames.filter(o=>o.userData.isCanvas),false)[0];renderer.domElement.style.cursor=h?'crosshair':'default'});
+function toast(s){let t=$('#toast');t.textContent=s;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2100)}
+function beep(){try{let c=new AudioContext(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=620;o.type='sine';g.gain.setValueAtTime(.035,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.09);o.start();o.stop(c.currentTime+.1)}catch{}}
+function chime(){if(!soundOn)return;try{const c=new AudioContext();[523.25,659.25,783.99,1046.5].forEach((f,i)=>{const o=c.createOscillator(),g=c.createGain(),t=c.currentTime+i*.09;o.type='triangle';o.frequency.value=f;o.connect(g);g.connect(c.destination);g.gain.setValueAtTime(.001,t);g.gain.exponentialRampToValueAtTime(.05,t+.02);g.gain.exponentialRampToValueAtTime(.001,t+.45);o.start(t);o.stop(t+.5)})}catch{}}
+
+// ---- Achievement logic & UI ----
+const queue=[];let showing=false;
+function achToast(a){queue.push(a);if(!showing)nextToast()}
+function nextToast(){const a=queue.shift(),el=$('#achToast');if(!a){showing=false;return}showing=true;el.innerHTML=`<div class="at-art">${badge(a)}</div><div><small>Achievement unlocked · ${TIER[a.tier].label}</small><b>${a.name}</b><span>${a.desc} +2% earnings</span></div>`;el.classList.add('show');chime();setTimeout(()=>{el.classList.remove('show');setTimeout(nextToast,500)},3600)}
+function checkAch(){let any=false;for(const a of ACH){if(!got.has(a.id)&&a.val()>=a.goal){got.add(a.id);any=true;popMedal(a.id);achToast(a);if(!$('#cabinet').classList.contains('open'))$('#trophy').classList.add('new')}}if(any){syncMedals();renderCabinet()}}
+function renderCabinet(){
+ const n=got.size;$('#cabCount').textContent=n+' / '+ACH.length;$('#cabBonus').textContent='+'+n*2+'% to all earnings';$('#cabBar').style.width=(n/ACH.length*100)+'%';$('#trophyCount').textContent=n+'/'+ACH.length;
+ $('#cabGrid').innerHTML=ACH.map(a=>{const g=got.has(a.id),v=Math.min(a.val(),a.goal),$$=a.money?'$':'';
+  return `<div class="card ${g?'got':'locked'}">${badge(a)}<b>${a.name}</b><p>${a.desc}</p>${g?`<span class="tier">${TIER[a.tier].label} · +2%</span>`:`<div class="bar"><i style="width:${v/a.goal*100}%"></i></div><span class="prog">${$$}${Math.floor(v).toLocaleString()} / ${$$}${a.goal.toLocaleString()}</span>`}</div>`}).join('');
+}
+const openCabinet=()=>{renderCabinet();$('#cabinet').classList.add('open');$('#trophy').classList.remove('new')},closeCabinet=()=>$('#cabinet').classList.remove('open');
+$('#trophy').addEventListener('click',openCabinet);$('#cabClose').addEventListener('click',closeCabinet);
+$('#cabinet').addEventListener('pointerdown',e=>{if(e.target.id==='cabinet')closeCabinet()});
+addEventListener('keydown',e=>{if(e.key==='Escape')closeCabinet()});
+
+const data={brush:{key:'brush',base:15,level:()=>brush,inc:()=>brush++},assistant:{key:'assistant',base:50,level:()=>assist,inc:()=>assist++},room:{key:'room',base:120,level:()=>room,inc:()=>room++}};
+function cost(k){return Math.floor(data[k].base*Math.pow(1.58,data[k].level()))}function income(){return (assist*(1+room)*1.5+room*1.1)*mult()}
+function refresh(){ $('#cash').textContent='$'+Math.floor(money).toLocaleString();$('#rate').textContent='$'+income().toFixed(1);$('#level').textContent='LVL '+(1+Math.floor(strokes/25));$('#tapval').textContent='$'+fmt(tapVal());$('#strokes').textContent=Math.min(strokes,30);$('#progress').style.width=Math.min(strokes/30*100,100)+'%';for(let k in data){let b=$('#'+k),c=cost(k);b.querySelector('.up-cost span').textContent=c.toLocaleString();b.querySelector('.upgrade-copy i').textContent=data[k].level();b.disabled=money<c}checkAch();if($('#cabinet').classList.contains('open'))renderCabinet()}
+for(let k in data)$('#'+k).addEventListener('click',()=>{let c=cost(k);if(money>=c){money-=c;data[k].inc();toast(({brush:'Fresh brushes! Your strokes are worth more.',assistant:'A new artist joined the studio!',room:'The gallery is growing!'}[k]));refresh()}});
+$('#reset').addEventListener('click',()=>{if(confirm('Start a fresh canvas? Your gallery, upgrades and trophies will reset.')){money=0;total=0;strokes=0;brush=0;assist=0;room=0;painted=0;got.clear();queue.length=0;syncMedals();renderCabinet();refresh();save();toast('A fresh start ✨')}});$('#sound').addEventListener('click',e=>{soundOn=!soundOn;e.currentTarget.textContent=soundOn?'♫':'♪';toast(soundOn?'Sound on':'Sound off')});
+const save=()=>localStorage.setItem('littleGallery',JSON.stringify({money,total,strokes,brush,assist,room,painted,ach:[...got]}));
+let last=performance.now();function animate(now){requestAnimationFrame(animate);let dt=Math.min((now-last)/1000,.1);last=now;const gain=income()*dt;money+=gain;total+=gain;scene.rotation.y=Math.sin(now*.0003)*.008;
+ for(const id in medals){const m=medals[id],t0=m.userData.t0;if(t0){const k=(now-t0)/1100;if(k>=1){m.userData.t0=0;m.scale.setScalar(1);m.position.y=m.userData.base;m.rotation.z=0}else{const s=Math.sin(k*Math.PI);m.scale.setScalar(1+.7*s*(1-k));m.position.y=m.userData.base+.25*s*(1-k);m.rotation.z=Math.sin(k*18)*.25*(1-k)}}}
+ renderer.render(scene,camera)}requestAnimationFrame(animate);
+setInterval(()=>{refresh();save()},1000);addEventListener('beforeunload',save);syncMedals();renderCabinet();refresh();setTimeout(()=>$('#loading').classList.add('done'),500);
+</script>
+</body>
+</html>
