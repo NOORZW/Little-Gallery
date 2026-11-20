@@ -211,12 +211,17 @@ button{font-family:inherit;color:inherit}
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const NOW=()=>Date.now(),clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),pick=a=>a[Math.random()*a.length|0],rnd=(a,b)=>a+Math.random()*(b-a);
-const fmt=n=>{if(n>=1e12)return (n/1e12).toFixed(2)+'T';if(n>=1e9)return (n/1e9).toFixed(2)+'B';if(n>=1e6)return (n/1e6).toFixed(2)+'M';if(n>=1e4)return (n/1e3).toFixed(1)+'K';if(n>=100)return Math.floor(n).toLocaleString();return String(Math.round(n*100)/100)};
+const fmt=n=>{if(n>=1e15)return n.toExponential(2).replace('e+','e');if(n>=1e12)return (n/1e12).toFixed(2)+'T';if(n>=1e9)return (n/1e9).toFixed(2)+'B';if(n>=1e6)return (n/1e6).toFixed(2)+'M';if(n>=1e4)return (n/1e3).toFixed(1)+'K';if(n>=100)return Math.floor(n).toLocaleString();return String(Math.round(n*100)/100)};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
 /* ================= DATA ================= */
+const DIFFS=[
+ {n:'Relaxed',earn:1.5,cost:.8,late:1,gate:.7,thief:0,critic:0,desc:'Earnings ×1.5 · cheaper upgrades · no thieves or harsh critics.'},
+ {n:'Classic',earn:1,cost:1,late:1,gate:1,thief:0,critic:0,desc:'The original balance.'},
+ {n:'Hard',earn:.5,cost:1.3,late:1.05,gate:1.6,thief:1,critic:1,desc:'Earnings ×0.5 · upgrades cost 30% more and climb steeper past level 25 · venue earnings gates ×1.6 · thieves raid your walls · critics pan Common art.'},
+ {n:'Brutal',earn:.2,cost:1.7,late:1.09,gate:3,thief:2,critic:1,desc:'Earnings ×0.2 · upgrades cost 70% more and climb much steeper · venue gates ×3 · frequent thieves · critics pan Common art.'}];
 const NEED=12;
-const SIZES=[{id:'s',n:'Study',need:8,vm:.7,bonus:0,rk:0,icon:'▫️'},{id:'m',n:'Canvas',need:12,vm:1,bonus:0,rk:0,icon:'🖼️'},{id:'l',n:'Large',need:20,vm:1.9,bonus:.06,rk:2,icon:'🟫'},{id:'x',n:'Mural',need:36,vm:4.5,bonus:.12,rk:4,icon:'🌄'}];
+const SIZES=[{id:'s',n:'Study',need:8,vm:.7,bonus:0,rk:0,icon:'▫️'},{id:'m',n:'Canvas',need:12,vm:1,bonus:0,rk:0,icon:'🖼️'},{id:'l',n:'Large',need:20,vm:1.9,bonus:.06,rk:2,icon:'🟫'},{id:'x',n:'Mural',need:36,vm:4.5,bonus:.12,rk:4,icon:'🌄'},{id:'g',n:'Fresco',need:60,vm:9,bonus:.18,rk:7,icon:'⛪'}];
 const SZ=Object.fromEntries(SIZES.map(z=>[z.id,z]));
 const needOf=c=>c.need||NEED;
 const STYLES=[
@@ -227,11 +232,12 @@ const STYLES=[
  {id:'abstract',name:'Abstract Bloom',icon:'🔷',unlock:300,nouns:['Bloom','Echoes','Study in Joy','Pulse','Confetti']},
  {id:'desert',name:'Dune Light',icon:'🏜️',unlock:800,nouns:['Dunes','Caravan Hour','Red Mesa','Mirage','Dry Wind']},
  {id:'blossom',name:'Blossom Wind',icon:'🌸',unlock:2000,nouns:['Blossom','Hanami','Petal Fall','Spring Branch','Soft Rain']},
- {id:'aurora',name:'Northern Lights',icon:'🌌',unlock:3500,nouns:['Aurora','Ribbon Sky','Polar Hush','Green Veil','Frostlight']}];
+ {id:'aurora',name:'Northern Lights',icon:'🌌',unlock:3500,nouns:['Aurora','Ribbon Sky','Polar Hush','Green Veil','Frostlight']},
+ {id:'cavern',name:'Crystal Cavern',icon:'🔮',unlock:8000,nouns:['Geode','Glow Vault','Prism Hall','Deepwater','Amethyst']}];
 const STY=Object.fromEntries(STYLES.map(s=>[s.id,s]));
 const ADJ=['Quiet','Golden','Distant','Soft','Wild','Hidden','Gentle','Bright','Lonely','Warm','Brave','Dreaming'];
 const RAR=[{n:'Common',m:1,c:'#a98962'},{n:'Fine',m:2.2,c:'#7fae9c'},{n:'Rare',m:5,c:'#7d8fc9'},{n:'Masterpiece',m:14,c:'#e5b95e'},{n:'Legendary',m:40,c:'#c77d9e'}];
-const RANKS=[[0,'Hobbyist'],[25,'Local Favorite'],[100,'Rising Star'],[300,'Respected'],[800,'Renowned'],[2000,'Legend'],[3500,'Icon'],[8000,'Immortal']];
+const RANKS=[[0,'Hobbyist'],[25,'Local Favorite'],[100,'Rising Star'],[300,'Respected'],[800,'Renowned'],[2000,'Legend'],[3500,'Icon'],[8000,'Immortal'],[20000,'Mythic'],[50000,'Eternal']];
 const CITIES=[
  {n:'The Sunroom',sub:'Open daily · Est. just now',wall:'#e9dfcf',side:'#e5dac9',floor:'#9a8065',bg:'#d8d1c4'},
  {n:'Harbor Loft',sub:'Salt air & gallery lights',wall:'#dde8e6',side:'#d3e0de',floor:'#8a7866',bg:'#c6d5d2'},
@@ -257,11 +263,15 @@ const UPS=[
  {k:'sitters',icon:'🎭',name:'Sitters & models',desc:'+6% painting value · commissions +4% each',base:1500,g:1.7,max:10,spec:'portrait'},
  {k:'salesroom',icon:'💼',name:'Private salesroom',desc:'+6% offer prices · +1 offer slot per 3 lvls',base:1500,g:1.7,max:10,spec:'dealer'},
  {k:'docents',icon:'🎫',name:'Docent tours',desc:'+10% exhibit income & tips',base:1500,g:1.7,max:10,spec:'curator'},
- {k:'cat',icon:'🐈',name:'Gallery cat',desc:'Roams the gallery · click it for tips & Flow',base:1200,g:1,max:1}];
+ {k:'cat',icon:'🐈',name:'Gallery cat',desc:'Roams the gallery · click it for tips & Flow',base:1200,g:1,max:1},
+ {k:'security',icon:'💂',name:'Security guard',desc:'Thieves are caught sooner · alarms scare some off',base:8000,g:2.4,max:5},
+ {k:'gilder',icon:'🪞',name:'Gilded frames',desc:'+4% painting value per level',base:25000,g:1.9,max:20},
+ {k:'foundation',icon:'🏦',name:'Art foundation',desc:'+3% to ALL earnings per level (compounding)',base:150000,g:2.1,max:40}];
 const BOOSTS=[
  {k:'esp',icon:'☕',name:'Espresso rush',desc:'Strokes pay ×2 · Flow fades slower',dur:60,mul:30},
  {k:'open',icon:'🎟️',name:'Open house',desc:'Visitors arrive twice as often',dur:90,mul:40},
- {k:'press',icon:'📰',name:'Press release',desc:'Offers pay +30% · critics visit sooner',dur:120,mul:50}];
+ {k:'press',icon:'📰',name:'Press release',desc:'Offers pay +30% · critics visit sooner',dur:120,mul:50},
+ {k:'gala',icon:'🥂',name:'Charity gala',desc:'VIPs flock in · tips ×2',dur:90,mul:70}];
 const SPEC={
  portrait:{n:'Portraitist',icon:'🧑‍🎨',d:'Paintings worth +20% · better odds of rare art · commissions pay +15%'},
  dealer:{n:'Dealer',icon:'💼',d:'Offers pay +20% · 2 extra offer slots · direct sales +15% · more collectors'},
@@ -298,7 +308,7 @@ const _bc={};const badge=a=>_bc[a.id]||(_bc[a.id]=badgeRaw(a));function badgeRaw
 const KEY='littleGallery3',SAVE_VER=4,TAB=Math.random().toString(36).slice(2),OWN=KEY+':owner';try{localStorage.setItem(OWN,TAB)}catch(e){}
 const randSeed=()=>Math.floor(Math.random()*1e9);
 const newCur=(style,size='m')=>{const z=SZ[size]||SZ.m;return{progress:0,seed:randSeed(),style,flowSum:0,n:0,bonus:0,size:z.id,need:z.need,vm:z.vm,sb:z.bonus}};
-const defaults=()=>({cash:0,lifetime:0,run:0,strokes:0,done:0,rep:0,stars:0,moves:0,up:{brush:0,assistant:0,room:0,light:0,market:0,muse:0,storage:0,mentor:0,agent:0,patron:0,autosell:0,autohang:0,sitters:0,salesroom:0,docents:0,cat:0},inv:[],auc:[],lowp:false,hang:Array(8).fill(null),style:'sunrise',size:'m',cur:newCur('sunrise'),orders:[],offers:[],goals:[],st:{sales:0,orders:0,visitors:0,tips:0,masters:0,rares:0,hangs:0,legends:0,critics:0,fairs:0,goals:0,donated:0,pets:0,auctions:0,murals:0,vips:0},ach:[],seen:NOW(),nid:1,sound:true,born:NOW(),bk:NOW(),chStart:NOW(),wing:[],won:0,spec:null,clients:{},ver:SAVE_VER,notify:false,ntf:-1,day:{last:0,streak:0,total:0,claimed:0,freeze:1,fweek:0}});
+const defaults=()=>({cash:0,lifetime:0,run:0,strokes:0,done:0,rep:0,stars:0,moves:0,up:{brush:0,assistant:0,room:0,light:0,market:0,muse:0,storage:0,mentor:0,agent:0,patron:0,autosell:0,autohang:0,sitters:0,salesroom:0,docents:0,cat:0,security:0,gilder:0,foundation:0},inv:[],auc:[],lowp:false,hang:Array(8).fill(null),style:'sunrise',size:'m',cur:newCur('sunrise'),orders:[],offers:[],goals:[],st:{sales:0,orders:0,visitors:0,tips:0,masters:0,rares:0,hangs:0,legends:0,critics:0,fairs:0,goals:0,donated:0,pets:0,auctions:0,murals:0,vips:0,thieves:0,lost:0,caverns:0,frescos:0},ach:[],seen:NOW(),nid:1,sound:true,born:NOW(),bk:NOW(),chStart:NOW(),wing:[],won:0,spec:null,clients:{},ver:SAVE_VER,diff:2,notify:false,ntf:-1,day:{last:0,streak:0,total:0,claimed:0,freeze:1,fweek:0}});
 let S=defaults(),returning=false;
 try{const raw=localStorage.getItem(KEY);
  if(raw){const o=JSON.parse(raw);S=Object.assign(defaults(),o);S.up=Object.assign(defaults().up,o.up);S.st=Object.assign(defaults().st,o.st);S.day=Object.assign(defaults().day,o.day);{const from=o.ver||3;S.ver=SAVE_VER;/* migrations by version go here; v4 only added fields that defaults() already supplies */if(from<4&&!S.clients)S.clients={}}returning=true}
@@ -313,9 +323,9 @@ S.clients=Object.fromEntries(Object.entries(S.clients&&typeof S.clients==='objec
 while(S.hang.length<8)S.hang.push(null);
 S.hang=S.hang.map(id=>S.inv.some(p=>p.id===id)?id:null);
 if(!STY[S.style])S.style='sunrise';if(!SZ[S.size])S.size='m';if(!S.cur||!S.cur.seed||!STY[S.cur.style])S.cur=newCur(S.style,S.size);
-if(S.spec&&!SPEC[S.spec])S.spec=null;if(!S.clients||typeof S.clients!=='object')S.clients={};
+if(S.spec&&!SPEC[S.spec])S.spec=null;if(!S.clients||typeof S.clients!=='object')S.clients={};S.diff=DIFFS[S.diff]?S.diff:2;
 const got=new Set(S.ach);
-const flow={v:0,last:0},FX={fair:0,esp:0,open:0,press:0};
+const flow={v:0,last:0},FX={fair:0,esp:0,open:0,press:0,gala:0};
 const byId=id=>S.inv.find(p=>p.id===id);
 const isHung=p=>S.hang.includes(p.id);
 const rankIdx=()=>{let r=0;RANKS.forEach((x,i)=>{if(S.rep>=x[0])r=i});return r};
@@ -327,12 +337,13 @@ function renderSpec(){const el=$('#specBox'),rk=rankIdx();
  if(!S.spec){el.innerHTML='<div class="card-block offer"><div class="row"><b>🧭 Choose your path</b></div><small>Your studio can specialize. You can pick again after each relocation.</small>'+Object.entries(SPEC).map(([k,s])=>`<div class="req"><div class="row"><b>${s.icon} ${s.n}</b></div><small>${s.d}</small><div class="acts"><button class="mini pri" data-spec="${k}">Become a ${s.n}</button></div></div>`).join('')+'</div>';return}
  const s=SPEC[S.spec];el.innerHTML=`<div class="card-block"><div class="row"><b>${s.icon} ${s.n}</b><span class="rbadge r3">Specialization</span></div><small>${s.d}</small></div>`}
 function pauseTab(){if(paused)return;paused=true;noSave=true;modal('Open in another tab','Little Gallery is running in another tab, so this one is paused to keep your save safe. Take over here to continue from the latest progress.',[['Take over here',()=>location.reload(),'pri']])}
-const mult=()=>(1+.02*got.size)*(1+.08*S.stars)*Math.pow(1.6,Math.min(S.moves,20))*(1+.05*S.up.patron);
+const DF=()=>DIFFS[S.diff]||DIFFS[2];
+const mult=()=>(1+.02*got.size)*(1+.08*S.stars)*Math.pow(1.6,Math.min(S.moves,20))*(1+.05*S.up.patron)*DF().earn*Math.pow(1.03,S.up.foundation);
 const slotsUnlocked=()=>Math.min(8,3+S.up.room);
 const capacity=()=>12+6*S.up.storage;
 const hungList=()=>S.hang.map((id,i)=>id&&i<slotsUnlocked()&&byId(id)?byId(id):null).filter(Boolean);
 const baseStroke=()=>(1+S.up.brush*2)*mult();
-const paintBase=()=>18*(1+.45*S.up.brush)*mult()*portM();
+const paintBase=()=>18*(1+.45*S.up.brush)*mult()*portM()*(1+.04*S.up.gilder);
 const THEME={style:null,left:0};
 const harmony=()=>{const n=new Set(hungList().map(p=>p.style)).size;return n>=5?1.3:n>=3?1.15:1};
 const exhibit=()=>hungList().reduce((s,p)=>s+p.value*.01*(THEME.left>0&&p.style===THEME.style?2.5:1),0)*harmony()*(1+.15*S.up.light)*(FX.fair>0?1.5:1)*curM();
@@ -423,7 +434,7 @@ function shiftCol(hex,dh,ds,dl){let [r,g,b]=[1,3,5].map(i=>parseInt(hex.substr(i
  return '#'+q.map(v=>Math.round((v+m)*255).toString(16).padStart(2,'0')).join('')}
 const palCache=new Map();
 function palFor(p){const key=p.style+':'+p.seed;let P=palCache.get(key);if(P)return P;
- const R=rngf(p.seed*17+5),night=p.style==='moon'||p.style==='aurora',dh=(R()-.5)*(night?44:70),ds=.8+R()*.4,dl=(R()-.5)*(night?.06:.1);
+ const R=rngf(p.seed*17+5),night=p.style==='moon'||p.style==='aurora'||p.style==='cavern',dh=(R()-.5)*(night?44:70),ds=.8+R()*.4,dl=(R()-.5)*(night?.06:.1);
  P=PAL[p.style][p.seed%3].map(c=>shiftCol(c,dh,ds,dl));
  if(['abstract','blossom','forest'].includes(p.style)&&R()<.22){const t=P[1];P[1]=P[2];P[2]=t}
  if(palCache.size>600)palCache.clear();palCache.set(key,P);return P}
@@ -472,6 +483,19 @@ const EXTRAS={
   shoot,
   (g,w,h,P,R,A)=>{for(let i=0;i<3;i++){al(g,A,.7+i*.1);g.fillStyle=i%2?P[3]:P[2];tri(g,40+i*80+R()*30,h*.74,120+R()*60,70+R()*50)}},
   (g,w,h,P,R,A)=>{al(g,A,.5);g.fillStyle=P[2];g.fillRect(0,h*.86,w,h*.14);g.strokeStyle=P[1];g.lineWidth=3;g.lineCap='round';for(let i=0;i<5;i++){al(g,A,.4);const x=R()*w;g.beginPath();g.moveTo(x,h*.88+i*5);g.lineTo(x+30+R()*30,h*.88+i*5);g.stroke()}}]};
+PAL.cavern=[['#1b1233','#6ee7f0','#b46bd6','#0d0820','#e8e0ff'],['#14213d','#7af0c8','#6a7bd6','#0a1226','#e0f4ff'],['#2a1233','#f08ad0','#7f5bd6','#120820','#ffe8f7']];
+LAYERS.cavern=[
+ (g,w,h,P,R,A)=>grad(g,w,h,P[0],P[3],A),
+ (g,w,h,P,R,A)=>{for(let i=0;i<3;i++){const x=R()*w,y=h*(.3+R()*.5),gr=g.createRadialGradient(x,y,4,x,y,80+R()*40);gr.addColorStop(0,P[1]);gr.addColorStop(1,'rgba(0,0,0,0)');al(g,A,.35);g.fillStyle=gr;g.fillRect(x-130,y-130,260,260)}},
+ (g,w,h,P,R,A)=>{al(g,A);g.fillStyle=P[3];for(let i=0;i<7;i++){const x=R()*w,l=30+R()*80,bw=14+R()*20;g.beginPath();g.moveTo(x-bw/2,0);g.lineTo(x+bw/2,0);g.lineTo(x,l);g.closePath();g.fill()}},
+ (g,w,h,P,R,A)=>hills(g,w,h,h*.9,18,R,P[3],A,1),
+ (g,w,h,P,R,A)=>{for(let i=0;i<8;i++){const x=10+R()*220,y=h*(.84+R()*.12),s=26+R()*46,lean=(R()-.5)*14;al(g,A,.9);g.fillStyle=i%2?P[2]:P[1];g.beginPath();g.moveTo(x-s*.18,y);g.lineTo(x+lean-s*.1,y-s);g.lineTo(x+lean+s*.1,y-s);g.lineTo(x+s*.18,y);g.closePath();g.fill();al(g,A,.35);g.fillStyle=P[4];g.beginPath();g.moveTo(x-s*.18,y);g.lineTo(x+lean-s*.1,y-s);g.lineTo(x,y);g.closePath();g.fill()}},
+ (g,w,h,P,R,A)=>dotsB(g,w,h,P,R,A,30,P[4],h*.2,h*.9)];
+EXTRAS.cavern=[
+ (g,w,h,P,R,A)=>{al(g,A,.6);g.fillStyle=P[1];g.beginPath();g.ellipse(w*(.3+R()*.4),h*.88,70,10,0,0,7);g.fill();al(g,A,.5);g.strokeStyle=P[4];g.lineWidth=1.4;for(let i=0;i<3;i++){g.beginPath();g.ellipse(w*.5,h*.88,30+i*18,3+i*2,0,0,7);g.stroke()}},
+ (g,w,h,P,R,A)=>{for(let i=0;i<7;i++){const x=R()*w,y=h*(.2+R()*.5);al(g,A,.5);g.fillStyle=P[1];g.beginPath();g.arc(x,y,9,0,7);g.fill();al(g,A);g.fillStyle=P[4];g.beginPath();g.arc(x,y,3.5,0,7);g.fill()}},
+ (g,w,h,P,R,A)=>{const x=60+R()*120,y=h*.9,s=110+R()*50;al(g,A);g.fillStyle=P[2];g.beginPath();g.moveTo(x-22,y);g.lineTo(x-14,y-s*.8);g.lineTo(x,y-s);g.lineTo(x+14,y-s*.8);g.lineTo(x+22,y);g.closePath();g.fill();al(g,A,.4);g.fillStyle=P[4];g.beginPath();g.moveTo(x-22,y);g.lineTo(x-14,y-s*.8);g.lineTo(x,y-s);g.lineTo(x,y);g.closePath();g.fill()},
+ (g,w,h,P,R,A)=>{al(g,A,.12);g.fillStyle=P[4];for(let i=0;i<3;i++){const x=R()*w;g.beginPath();g.moveTo(x,0);g.lineTo(x-20,h);g.lineTo(x+30,h);g.closePath();g.fill()}}];
 const FINISH=[null,
  (g,w,h,P,R,A)=>{al(g,A,.22);const gr=g.createLinearGradient(0,h*.35,0,h);gr.addColorStop(0,'rgba(255,255,255,0)');gr.addColorStop(1,P[4]);g.fillStyle=gr;g.fillRect(0,0,w,h)},
  (g,w,h,P,R,A)=>{for(let i=0;i<160;i++){al(g,A,.05+R()*.12);g.fillStyle=R()<.5?'#ffffff':'#000000';g.fillRect(R()*w,R()*h,1+R()*1.5,1+R()*1.5)}},
@@ -601,7 +625,20 @@ const ACH=[
  {id:'mural10',name:'Fresco Fanatic',desc:'Finish 10 Murals.',tier:'gold',goal:10,val:()=>S.st.murals,emoji:'🎨'},
  {id:'cat25',name:'Cat Person',desc:'Pet the gallery cat 25 times.',tier:'bronze',goal:25,val:()=>S.st.pets,emoji:'🐈'},
  {id:'vip1',name:'Red Carpet',desc:'Host a VIP visitor.',tier:'silver',goal:1,val:()=>S.st.vips,emoji:'👑'},
- {id:'vip10',name:'Royal Treatment',desc:'Host 10 VIP visitors.',tier:'gold',goal:10,val:()=>S.st.vips,emoji:'🤴'}];
+ {id:'vip10',name:'Royal Treatment',desc:'Host 10 VIP visitors.',tier:'gold',goal:10,val:()=>S.st.vips,emoji:'🤴'},
+ {id:'thief1',name:'Gotcha!',desc:'Catch a thief in the act.',tier:'bronze',goal:1,val:()=>S.st.thieves,emoji:'🦹'},
+ {id:'thief10',name:'Neighbourhood Watch',desc:'Catch 10 thieves.',tier:'silver',goal:10,val:()=>S.st.thieves,emoji:'🔦'},
+ {id:'thief50',name:'Thief-Taker General',desc:'Catch 50 thieves.',tier:'gold',goal:50,val:()=>S.st.thieves,emoji:'🚔'},
+ {id:'lost5',name:'Insurance Claim',desc:'Have 5 paintings stolen. It happens to the best.',tier:'bronze',goal:5,val:()=>S.st.lost,emoji:'📄'},
+ {id:'cavern1',name:'Into the Geode',desc:'Paint a Crystal Cavern.',tier:'silver',goal:1,val:()=>S.st.caverns,emoji:'🔮'},
+ {id:'cavern25',name:'Crystal Gazer',desc:'Paint 25 Crystal Caverns.',tier:'gold',goal:25,val:()=>S.st.caverns,emoji:'💠'},
+ {id:'fresco1',name:'Chapel Ceiling',desc:'Finish a Fresco.',tier:'gold',goal:1,val:()=>S.st.frescos,emoji:'⛪'},
+ {id:'mythic',name:'Mythic',desc:'Reach the Mythic rank.',tier:'gold',goal:8,val:()=>rankIdx(),emoji:'🐉'},
+ {id:'eternal',name:'Eternal',desc:'Reach the Eternal rank.',tier:'gold',goal:9,val:()=>rankIdx(),emoji:'♾️'},
+ {id:'found10',name:'Foundation Fund',desc:'Bring Art foundation to level 10.',tier:'silver',goal:10,val:()=>S.up.foundation,emoji:'🏦'},
+ {id:'found40',name:'The Endowment',desc:'Max out the Art foundation.',tier:'gold',goal:40,val:()=>S.up.foundation,emoji:'💎'},
+ {id:'gilder20',name:'Gilded Age',desc:'Max out Gilded frames.',tier:'gold',goal:20,val:()=>S.up.gilder,emoji:'🪞'},
+ {id:'hard1b',name:'Hard Earned',desc:'Earn $1,000,000,000 in total on Hard or Brutal.',tier:'gold',goal:1e9,val:()=>DF().earn<=.5?S.lifetime:0,emoji:'🔥',money:1}];
 ACH.slice(0,12).forEach((a,i)=>{const side=i<6?-1:1,j=i%6,row=Math.floor(j/3),col=j%3;
  const m=new THREE.Mesh(new THREE.PlaneGeometry(.5,.6),new THREE.MeshBasicMaterial({map:badgeTexture(a),transparent:true,color:'#2f2b26',opacity:.3}));
  m.position.set(side*5.7+(col-1)*.64,(row?.65:1.7)+.035+.3,-3.08);m.userData.base=m.position.y;scene.add(m);medals[a.id]=m});
@@ -759,7 +796,7 @@ function completePainting(){
  const score=.30*Math.random()+.35*flowAvg+Math.min(.2,S.up.brush*.02)+S.up.mentor*.015+c.bonus+(c.sb||0)+(sp$('portrait')?.05:0);
  const r=score>=1?4:score>=.85?3:score>=.65?2:score>=.40?1:0,st=STY[c.style];
  const p={id:S.nid++,seed:c.seed,style:c.style,rarity:r,title:`${ADJ[c.seed%ADJ.length]} ${st.nouns[(c.seed>>3)%st.nouns.length]}`,value:Math.round(paintBase()*RAR[r].m*(c.vm||1))};
- S.inv.push(p);S.done++;if(c.size==='x')S.st.murals++;if(r===2)S.st.rares++;if(r>=3)S.st.masters++;if(r===4)S.st.legends++;
+ S.inv.push(p);S.done++;if(c.size==='x'||c.size==='g')S.st.murals++;if(c.size==='g')S.st.frescos++;if(p.style==='cavern')S.st.caverns++;if(r===2)S.st.rares++;if(r>=3)S.st.masters++;if(r===4)S.st.legends++;
  if(S.inv.length>capacity()){const pl=S.inv.filter(q=>!isHung(q)),sf=pl.filter(q=>!needed(q)),cand=(sf.length?sf:pl).sort((a,b)=>a.value-b.value)[0];if(cand){const pr=Math.round(cand.value*.6);removePainting(cand.id);gain(pr);toast(`Storage full — sold "${cand.title}" for $${fmt(pr)}`)}}
  S.cur=newCur(S.style,S.size);redrawEasel();dirty.coll=dirty.career=dirty.orders=true;goalEv('paint');
  const nowT=performance.now();if(r>=2||nowT-lastPaintToast>2500){lastPaintToast=nowT;toast(`🎨 ${RAR[r].n}: "${p.title}" · $${fmt(p.value)}`);r>=2?sFan():sChime()}if(nowT-lastPaintSave>3000){lastPaintSave=nowT;save()}}
@@ -771,8 +808,8 @@ function hangPainting(pid,slot){const p=byId(pid);if(!p)return;if(isHung(p))retu
 function unhang(pid){const i=S.hang.indexOf(pid);if(i>=0){S.hang[i]=null;refreshSlot(i);dirty.coll=true}}
 function sellPainting(pid,price){const p=byId(pid);if(!p)return;const pr=price??sellVal(p);removePainting(pid);gain(pr);sCoin();toast(`Sold "${p.title}" for $${fmt(pr)}`);return pr}
 function buyUp(k){const u=UPS.find(x=>x.k===k),lvl=S.up[k],c=cost(u);if(lvl>=u.max||S.cash<c||(u.spec&&S.spec!==u.spec))return;S.cash-=c;S.up[k]++;
- if(k==='room'){refreshSlots();toast(S.up.room+3<=8?'A new frame is ready to hang!':'The gallery is growing!')}else if(k==='light'){hemi.intensity=2+.08*S.up.light;toast('The gallery glows warmer')}else toast({brush:'Fresh brushes! Your strokes are worth more.',assistant:'A new artist joined the studio!',market:'Word is getting around town.',muse:'The muse lamp hums.',storage:'More room for paintings.',mentor:'Your mentor sharpens your eye.',agent:'Your agent works the phones.',patron:'The patron circle grows.',autosell:'A dealer now handles your Commons.',autohang:'The gallery manager takes charge of the walls.',sitters:'More sitters line up at the door.',salesroom:'The private salesroom impresses collectors.',docents:'Docents lead visitors through the rooms.',cat:'A cat has moved in! Click it for tips.'}[k]);if(k==='cat')ensureCat();sCoin();dirty.coll=true;save()}
-const cost=u=>Math.floor(u.base*Math.pow(u.g,S.up[u.k]));
+ if(k==='room'){refreshSlots();toast(S.up.room+3<=8?'A new frame is ready to hang!':'The gallery is growing!')}else if(k==='light'){hemi.intensity=2+.08*S.up.light;toast('The gallery glows warmer')}else toast({brush:'Fresh brushes! Your strokes are worth more.',assistant:'A new artist joined the studio!',market:'Word is getting around town.',muse:'The muse lamp hums.',storage:'More room for paintings.',mentor:'Your mentor sharpens your eye.',agent:'Your agent works the phones.',patron:'The patron circle grows.',autosell:'A dealer now handles your Commons.',autohang:'The gallery manager takes charge of the walls.',sitters:'More sitters line up at the door.',salesroom:'The private salesroom impresses collectors.',docents:'Docents lead visitors through the rooms.',cat:'A cat has moved in! Click it for tips.',security:'A guard now watches the walls.',gilder:'Fresh gilding catches the light.',foundation:'The foundation opens new doors.'}[k]);if(k==='cat')ensureCat();sCoin();dirty.coll=true;save()}
+const cost=u=>Math.floor(u.base*DF().cost*Math.pow(u.g,S.up[u.k])*Math.pow(DF().late,Math.max(0,S.up[u.k]-25)));
 function buyBoost(k){const b=BOOSTS.find(x=>x.k===k);if(!b||FX[k]>0)return;const c=boostCost(b);if(S.cash<c)return;S.cash-=c;FX[k]=b.dur;toast(`${b.icon} ${b.name} for ${b.dur}s!`);sCoin()}
 
 /* ================= OFFERS, ORDERS, EVENTS ================= */
@@ -789,7 +826,8 @@ function newOrder(quiet){const un=unlockedStyles(),rk=rankIdx(),mx=Math.min(2,Ma
  o.reward=Math.round(paintBase()*RAR[minR].m*mul*(1+.08*relLvl(client))*portOrd());o.rep=Math.round((3+minR*4)*(o.rush?1.5:1));S.orders.push(o);dirty.orders=true;$('[data-tab=orders]').classList.add('alert');if(!quiet)toast(`📜 ${o.rush?'🔥 RUSH commission':'New commission'} from ${o.client}`)}
 function orderMatch(o){return S.inv.filter(p=>p.style===o.style&&p.rarity>=o.minR&&briefOk(o,p)).sort((a,b)=>(isHung(a)-isHung(b))||a.rarity-b.rarity||a.value-b.value)[0]}
 const needed=p=>S.orders.some(o=>orderMatch(o)===p)||wingReqs(chNum()).some((r,i)=>(S.wing[i]||0)<r.need&&donorFor(r)===p);
-function criticReview(p,quiet){const stars=Math.min(5,p.rarity+2),tip=p.value*.5,rep=Math.round((4+p.rarity*6)*(sp$('curator')?1.5:1));S.st.critics++;S.rep+=rep;gain(tip);if(!quiet)toast(`🧐 The critic gives "${p.title}" ${'★'.repeat(stars)}${'☆'.repeat(5-stars)} · +${rep} rep`);return{tip,rep}}
+function criticReview(p,quiet){if(DF().critic&&p.rarity===0){S.st.critics++;S.rep=Math.max(RANKS[rankIdx()][0],S.rep-3);if(!quiet)toast(`🧐 The critic pans "${p.title}" · −3 rep. Hang better art!`);return{tip:0,rep:-3}}
+ const stars=Math.min(5,p.rarity+2),tip=p.value*.5,rep=Math.round((4+p.rarity*6)*(sp$('curator')?1.5:1));S.st.critics++;S.rep+=rep;gain(tip);if(!quiet)toast(`🧐 The critic gives "${p.title}" ${'★'.repeat(stars)}${'☆'.repeat(5-stars)} · +${rep} rep`);return{tip,rep}}
 /* ---- auction house ---- */
 const AUC_T=20,AUC_MAX=()=>1+(sp$('dealer')?1:0)+(S.up.agent/5|0);
 const aucBid=a=>Math.round(a.price*Math.min(1,.35+.65*(1-a.left/AUC_T)));
@@ -807,27 +845,35 @@ function fairStart(){FX.fair=45;S.st.fairs++;toast('🎪 Art Fair weekend! Visit
 const GEO={body:new THREE.CylinderGeometry(.2,.3,.95,10),head:new THREE.SphereGeometry(.2,12,10),hat:new THREE.CylinderGeometry(.16,.16,.3,10),brim:new THREE.CylinderGeometry(.28,.28,.03,12),beret:new THREE.SphereGeometry(.23,12,6,0,Math.PI*2,0,1.3),clip:new THREE.BoxGeometry(.18,.24,.03)};
 const matCache={},mc=(c,r=.8)=>matCache[c]||(matCache[c]=mat(c,r));
 function makeFigure(type){const g=new THREE.Group(),cols=['#e98169','#8197c5','#9ec5a3','#e5b95e','#c77d9e','#698f82','#d6a35c'];
- const bc=type==='critic'?'#2b2a2e':type==='collector'?'#544b65':type==='vip'?'#7a2d4a':pick(cols);
+ const bc=type==='critic'?'#2b2a2e':type==='collector'?'#544b65':type==='vip'?'#7a2d4a':type==='thief'?'#17171a':pick(cols);
  const body=new THREE.Mesh(GEO.body,mc(bc));body.position.y=.5;const head=new THREE.Mesh(GEO.head,mc(pick(['#f1cfa8','#d9a47a','#a8704a','#7a4b32'])));head.position.y=1.2;
  body.castShadow=head.castShadow=true;g.add(body,head);
  if(type==='collector'){const hat=new THREE.Mesh(GEO.hat,mc('#1f1d1a'));hat.position.y=1.5;const br=new THREE.Mesh(GEO.brim,mc('#1f1d1a'));br.position.y=1.37;g.add(hat,br)}
- else if(type==='critic'){const be=new THREE.Mesh(GEO.beret,mc('#c9574e'));be.position.set(.03,1.32,0);be.scale.y=.6;const cl=new THREE.Mesh(GEO.clip,mc('#f5f0e7'));cl.position.set(.2,.75,.22);g.add(be,cl)}else if(type==='vip'){const cr=new THREE.Mesh(new THREE.ConeGeometry(.2,.28,6),new THREE.MeshStandardMaterial({color:'#f1c966',roughness:.3,metalness:.6}));cr.position.y=1.5;g.add(cr)}
+ else if(type==='critic'){const be=new THREE.Mesh(GEO.beret,mc('#c9574e'));be.position.set(.03,1.32,0);be.scale.y=.6;const cl=new THREE.Mesh(GEO.clip,mc('#f5f0e7'));cl.position.set(.2,.75,.22);g.add(be,cl)}else if(type==='vip'){const cr=new THREE.Mesh(new THREE.ConeGeometry(.2,.28,6),new THREE.MeshStandardMaterial({color:'#f1c966',roughness:.3,metalness:.6}));cr.position.y=1.5;g.add(cr)}else if(type==='thief'){const cap=new THREE.Mesh(GEO.hat,mc('#17171a'));cap.position.y=1.45;const bag=new THREE.Mesh(GEO.clip,mc('#c9574e'));bag.scale.set(1.8,1.8,1.8);bag.position.set(-.22,.55,-.2);g.add(cap,bag)}
  return g}
 const bubTex={};function bubbleTex(e){return bubTex[e]||(()=>{const c=document.createElement('canvas');c.width=c.height=96;const x=c.getContext('2d');x.fillStyle='#fffdfa';x.beginPath();x.arc(48,44,38,0,7);x.fill();x.font='44px serif';x.textAlign='center';x.textBaseline='middle';x.fillText(e,48,48);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return bubTex[e]=t})()}
 const V=[];
 function pickTarget(v){const idx=S.hang.map((id,i)=>id&&i<slotsUnlocked()&&byId(id)?i:-1).filter(i=>i>=0);
  if(idx.length){v.slot=pick(idx);const s=SLOTS[v.slot],tx=s.x+(Math.random()-.5)*.8;v.tx=tx;v.tz=s.t==='wall'?(Math.abs(tx)<1.6?.95:-1.4):s.z+1.5}
  else{v.slot=-1;v.tx=(Math.random()-.5)*6;v.tz=1.2}}
-function spawnVisitor(type='tourist'){if(V.length>=9)return;const g=makeFigure(type),side=Math.random()<.5?-1:1;g.position.set(side*9.2,0,1+Math.random()*1.2);scene.add(g);if(type==='vip')toast('👑 A VIP just walked in!');
+function spawnVisitor(type='tourist'){if(V.length>=9)return;const g=makeFigure(type),side=Math.random()<.5?-1:1;g.position.set(side*9.2,0,1+Math.random()*1.2);scene.add(g);if(type==='vip')toast('👑 A VIP just walked in!');if(type==='thief')toast('🦹 A thief slipped in! Click them before they grab a painting');
  const spr=new THREE.Sprite(new THREE.SpriteMaterial({map:bubbleTex('🙂'),transparent:true,depthTest:false}));spr.scale.set(.55,.55,1);spr.position.y=1.95;spr.visible=false;g.add(spr);
- const v={g,spr,type,fav:pick(unlockedStyles()).id,name:pick(BUYERS),state:'in',t:0,look:3+Math.random()*3,speed:1.7+Math.random()*.8,phase:Math.random()*6,tx:0,tz:0,slot:-1};pickTarget(v);V.push(v)}
+ const v={g,spr,type,fav:pick(unlockedStyles()).id,name:pick(BUYERS),state:'in',t:0,look:3+Math.random()*3,speed:1.7+Math.random()*.8,phase:Math.random()*6,tx:0,tz:0,slot:-1};pickTarget(v);V.push(v);
+ if(type==='thief'){v.speed=2.6;v.look=Math.max(3,7-.8*S.up.security);const hit=new THREE.Mesh(new THREE.BoxGeometry(.9,1.8,.9),new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}));hit.position.y=.9;hit.userData.slot='thief';hit.userData.v=v;g.add(hit);hitMeshes.push(hit);v.hit=hit}}
 const bubble=(v,e)=>{v.spr.material.map=bubbleTex(e);v.spr.material.needsUpdate=true;v.spr.visible=true};
 function visitorAct(v){const p=byId(S.hang[v.slot]);if(!p||v.slot<0){bubble(v,'🤔');return}
+ if(v.type==='thief'){stealPainting(v,p);return}
  S.st.visitors++;goalEv('visit');S.rep+=.2;const match=p.style===v.fav,pos=[v.g.position.x,1.9,v.g.position.z];
  if(v.type==='vip'){const pay=Math.round(p.value*(1.5+Math.random())*(1+.06*rankIdx()));gain(pay,pos);S.rep+=4;S.st.vips++;toast(`👑 A VIP admired "${p.title}" · tipped $${fmt(pay)} · +4 rep`);bubble(v,'🤩');if(S.sound)sFan();return}
  if(v.type==='critic'){criticReview(p);bubble(v,'⭐');return}
  if(v.type==='collector'&&S.offers.length<3+(S.up.agent/5|0)+dealSlots()&&!S.offers.some(o=>o.pid===p.id)&&Math.random()<(match?.8:.5)){addOffer(v.name,p,match);bubble(v,'💰');return}
- const tip=p.value*(.1+Math.random()*.2)*(match?1.5:1)*(1+.15*S.up.light)*(FX.fair>0?2:1)*(1+.06*rankIdx())*curM();gain(tip,pos);S.st.tips++;bubble(v,match?'😍':'❤️');if(S.sound)sCoin()}
+ const tip=p.value*(.1+Math.random()*.2)*(match?1.5:1)*(1+.15*S.up.light)*(FX.fair>0?2:1)*(FX.gala>0?2:1)*(1+.06*rankIdx())*curM();gain(tip,pos);S.st.tips++;bubble(v,match?'😍':'❤️');if(S.sound)sCoin()}
+function dropVisitor(v){scene.remove(v.g);if(v.hit){const k=hitMeshes.indexOf(v.hit);if(k>=0)hitMeshes.splice(k,1)}}
+function stealPainting(v,p){if(Math.random()<.12*S.up.security){bubble(v,'😖');toast('🚨 The alarm scared a thief off empty-handed');return}
+ bubble(v,'😈');removePainting(p.id);S.st.lost++;toast(`🦹 A thief made off with "${p.title}" (${RAR[p.rarity].n})!`);tone(150,.5,'sawtooth',.05)}
+function catchThief(v){if(!v||v.caught||v.state==='out')return;v.caught=true;const pay=Math.round(passive()*60+baseStroke()*80);
+ gain(pay,[v.g.position.x,1.9,v.g.position.z,'gold']);S.rep+=3;S.st.thieves++;bubble(v,'😵');v.state='out';v.tx=(v.g.position.x<0?-1:1)*9.6;v.tz=1.2;
+ toast(`🦹 Caught! The thief coughed up $${fmt(pay)} · +3 rep`);sCoin()}
 function updateVisitors(dt,now){
  for(let i=V.length-1;i>=0;i--){const v=V[i],p=v.g.position;
   if(v.state==='look'||v.state==='react'){v.t+=dt;
@@ -837,12 +883,12 @@ function updateVisitors(dt,now){
   const dx=v.tx-p.x,dz=v.tz-p.z,d=Math.hypot(dx,dz);
   if(d>.08){const s=Math.min(d,v.speed*dt);p.x+=dx/d*s;p.z+=dz/d*s;p.y=Math.abs(Math.sin(now*.01+v.phase))*.06;v.g.rotation.y=Math.atan2(dx,dz)}
   else if(v.state==='in'){v.state='look';v.t=0;bubble(v,'🖼️')}
-  else if(v.state==='out'){scene.remove(v.g);V.splice(i,1)}}}
+  else if(v.state==='out'){dropVisitor(v);V.splice(i,1)}}}
 function baseInterval(){const hc=hungList().length,rk=rankIdx();let t=14/(1+.18*S.up.market+.1*S.up.room+.15*rk+.12*hc);if(!hc)t*=3;if(FX.fair>0)t/=3;if(FX.open>0)t/=2;if(sp$('curator'))t/=1.2;return t}
 function spawnInterval(){return Math.max(.8,baseInterval()*rnd(.6,1.4))}
 
 /* ================= PANELS ================= */
-const T={visit:2,muse:25,order:30,critic:150,fair:300,theme:200,save:5,hud:0,ui:0,auto:4};
+const T={visit:2,muse:25,order:30,critic:150,fair:300,theme:200,thief:240,save:5,hud:0,ui:0,auto:4};
 let tab='studio';
 function buildStudio(){$('#p-studio').innerHTML=`<div id="specBox"></div><div class="section-head"><b>Studio upgrades</b><span class="level-pill" id="lvPill">LVL 1</span></div>`+UPS.map(u=>`<button class="upgrade" data-up="${u.k}"><span class="up-icon">${u.icon}</span><span class="upgrade-copy"><strong>${u.name}</strong><small>${u.desc} · Lv <i>0</i></small></span><span class="up-cost"></span></button>`).join('')+`<div class="h3">Timed boosts</div>`+BOOSTS.map(b=>`<button class="upgrade" data-boost="${b.k}"><span class="up-icon">${b.icon}</span><span class="upgrade-copy"><strong>${b.name}</strong><small>${b.desc} · ${b.dur}s</small></span><span class="up-cost"></span></button>`).join('')}
 function updStudio(){UPS.forEach(u=>{const b=$(`[data-up=${u.k}]`),lv=S.up[u.k],c=cost(u),mx=lv>=u.max;b.querySelector('i').textContent=lv;b.querySelector('.up-cost').textContent=mx?'MAX':'$'+fmt(c);b.disabled=mx||S.cash<c;b.style.display=(!u.spec||S.spec===u.spec)?'':'none'});
@@ -861,7 +907,7 @@ function renderOrders(){
  $('#p-orders').innerHTML=h}
 /* ================= CAMPAIGN: THE ROAD TO THE RETROSPECTIVE ================= */
 const FINAL=7,CH_DAYS=[1,2,3,4,5,6,7,12],STAR_BY=[3,4,5,6,7,8,10],NEED_TROPHIES=40,DAY=864e5;
-const earnGate=n=>n<8?7.5e6*Math.pow(2.4,n):7.5e6*Math.pow(2.4,7)*Math.pow(1.5,n-7);
+const earnGate=n=>DF().gate*(n<8?7.5e6*Math.pow(2.4,n):7.5e6*Math.pow(2.4,7)*Math.pow(1.5,n-7));
 const dur=ms=>{const s=Math.ceil(ms/1000),d=s/86400|0,h=s%86400/3600|0,m=s%3600/60|0;return d?`${d}d ${h}h`:h?`${h}h ${m}m`:`${m}m ${s%60}s`};
 const dayNum=()=>Math.floor((NOW()-new Date().getTimezoneOffset()*6e4)/DAY);
 const giftReady=()=>S.day.claimed!==dayNum(),giftAmt=()=>Math.round(Math.max(500,passive()*900+baseStroke()*500));
@@ -890,6 +936,7 @@ function renderCareer(){const st=chStatus(),n=st.n,here=CITIES[S.moves%CITIES.le
  ${fin?`<div class="req" id="rqK"><div class="row"><span>🏆 Trophies</span><small id="rKt"></small></div><div class="pbar"><i id="rKb"></i></div></div>`:''}
  <div class="acts"><button class="mini pri" id="relocate" style="width:100%;padding:10px"></button></div></div>
  <div class="card-block"><small>Relocating resets funds, upgrades and paintings. You keep trophies, reputation and Fame Stars (+8% to everything each), and every new city multiplies your earnings ×1.6. The renovation timer runs in real time, even while the game is closed. Your regular clients follow you to every new city.</small></div>
+ <div class="card-block"><div class="row"><b>🎚️ Difficulty</b><span class="rbadge r3">${DIFFS[S.diff].n}</span></div><small>${DIFFS[S.diff].desc}</small><div class="acts" style="flex-wrap:wrap">${DIFFS.map((d,i)=>`<button class="mini ${S.diff===i?'pri':''}" data-diff="${i}">${d.n}</button>`).join('')}</div></div>
  <div class="h3">Lifetime stats</div><div id="fStats"></div>
  <div class="acts" style="margin-top:10px"><button class="mini" id="notifybtn"></button><button class="mini" id="saveio">Backup &amp; restore save</button></div><small style="display:block;margin-top:6px;color:var(--muted)">Alerts arrive while this tab is open, even in the background. The tab title also shows the countdown.</small>`}
 function updFame(){const st=chStatus(),n=st.n,fin=n===FINAL&&!S.won,gate=earnGate(S.moves),el=id=>document.getElementById(id),set=(id,t)=>{const e=el(id);if(e)e.textContent=t},wd=(id,p)=>{const e=el(id);if(e)e.style.width=Math.max(0,Math.min(100,p))+'%'},ok=(id,v)=>{const e=el(id);if(e)e.classList.toggle('ok',!!v)};
@@ -907,11 +954,12 @@ function relocate(){const st=chStatus();if(!st.ok)return;
  if(st.n===FINAL&&!S.won){modal('Open the Retrospective?',`Everything you've painted comes together in <b>The Rotunda</b>. This ends the main story. You can keep playing in Endless mode afterwards.`,[['Not yet'],['Open the doors',victory,'pri']]);return}
  const g=STAR_BY[Math.min(S.moves,6)],nxt=CITIES[(S.moves+1)%CITIES.length],repBonus=100*(Math.min(S.moves,7)+1);
  modal('Relocate the gallery?',`You'll earn <b>★ ${g}</b> and <b>+${repBonus} reputation</b>, and move to <b>${nxt.n}</b> (all earnings ×1.6). Funds, upgrades, paintings, offers and orders reset. Trophies, reputation, Fame Stars and your regular clients stay. You will choose a specialization again.`,[['Not yet'],['Relocate',()=>{
-  S.stars+=g;S.rep+=repBonus;S.moves++;S.chStart=NOW();S.wing=[];S.spec=null;FX.esp=FX.open=FX.press=0;S.cash=50*S.stars;S.run=0;Object.keys(S.up).forEach(k=>S.up[k]=0);S.inv=[];S.hang=Array(8).fill(null);S.offers=[];S.orders=[];S.cur=newCur(S.style,S.size);flow.v=0;hemi.intensity=2;V.splice(0).forEach(v=>scene.remove(v.g));
+  S.stars+=g;S.rep+=repBonus;S.moves++;S.chStart=NOW();S.wing=[];S.spec=null;FX.esp=FX.open=FX.press=FX.gala=0;S.cash=50*S.stars;S.run=0;Object.keys(S.up).forEach(k=>S.up[k]=0);S.inv=[];S.hang=Array(8).fill(null);S.offers=[];S.orders=[];S.cur=newCur(S.style,S.size);flow.v=0;hemi.intensity=2;V.splice(0).forEach(dropVisitor);
   applyCity();ensureCat();refreshSlots();redrawEasel();dirty.coll=dirty.orders=dirty.career=true;T.order=20;toast(`Welcome to ${CITIES[S.moves%CITIES.length].n}! ★ +${g}`);sFan();save()},'pri']])}
 function saveModal(){S.bk=NOW();save();let code='';try{code=btoa(unescape(encodeURIComponent(localStorage.getItem(KEY)||'')))}catch(e){}
  modal('Backup & restore',`Your progress lives in this browser only. Copy this code somewhere safe; paste a code here to restore it on any device.<textarea class="save-area" id="saveBox" spellcheck="false">${code}</textarea>`,[['Close'],['Load pasted code',()=>{try{const raw=decodeURIComponent(escape(atob($('#saveBox').value.trim()))),o=JSON.parse(raw);if(typeof o.cash!=='number')throw 0;noSave=true;localStorage.setItem(KEY,raw);location.reload()}catch(e){toast('That code did not work')}},'pri']])}
-$('#p-fame').addEventListener('click',e=>{const d=e.target.closest('[data-donate]');if(d)donate(+d.dataset.donate);else if(e.target.id==='relocate')relocate();else if(e.target.id==='saveio')saveModal();else if(e.target.id==='notifybtn')toggleNotify()});
+function setDiff(i){if(!DIFFS[i]||S.diff===i)return;S.diff=i;toast(`🎚️ Difficulty: ${DIFFS[i].n}`);dirty.career=true;dirty.coll=true;save()}
+$('#p-fame').addEventListener('click',e=>{const df=e.target.closest('[data-diff]');if(df){setDiff(+df.dataset.diff);return}const d=e.target.closest('[data-donate]');if(d)donate(+d.dataset.donate);else if(e.target.id==='relocate')relocate();else if(e.target.id==='saveio')saveModal();else if(e.target.id==='notifybtn')toggleNotify()});
 function renderStyles(){const el=$('#styles');el.innerHTML=STYLES.map(s=>{const un=S.rep>=s.unlock;return `<button class="sty ${S.style===s.id?'on':''}" data-style="${s.id}" ${un?'':'disabled'}>${un?s.icon+' '+s.name:'🔒 '+s.unlock+' rep'}</button>`}).join('')}
 function setTab(t){tab=t;$$('.tab').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));$$('.panel').forEach(p=>p.classList.toggle('on',p.id==='p-'+t));$(`[data-tab=${t}]`).classList.remove('alert');if(t==='collection')dirty.coll=true;if(t==='orders')dirty.orders=true;if(t==='fame')dirty.career=true}
 $('#tabs').addEventListener('click',e=>{const b=e.target.closest('.tab');if(b)setTab(b.dataset.tab)});
@@ -950,6 +998,7 @@ function hideCtx(){ctxEl.style.display='none'}
 function placeAt(el,e){const r=mainEl.getBoundingClientRect();el.style.display='block';const w=el.offsetWidth,h=el.offsetHeight;el.style.left=clamp(e.clientX-r.left+12,6,r.width-w-6)+'px';el.style.top=clamp(e.clientY-r.top+12,6,r.height-h-6)+'px'}
 renderer.domElement.addEventListener('pointerdown',e=>{ensureAudio();hideCtx();const h=pickAt(e);if(!h)return;const id=h.object.userData.slot;
  if(id==='cat'){petCat();return}
+ if(id==='thief'){catchThief(h.object.userData.v);return}
  if(id==='easel'){brushing=true;overEasel=true;lastBrush=performance.now();lastPt=h.point;stroke('hand',h.point)}
  else{const i=id,p=byId(S.hang[i]);
   if(i>=slotsUnlocked()){toast('Locked — expand the gallery in the Studio tab');return}
@@ -957,7 +1006,7 @@ renderer.domElement.addEventListener('pointerdown',e=>{ensureAudio();hideCtx();c
   ctxEl.innerHTML=`<b>${esc(p.title)}</b><small>${RAR[p.rarity].n} · ${STY[p.style].name} · $${fmt(p.value)}</small><div class="acts"><button class="mini" id="cx1">Take down</button><button class="mini pri" id="cx2">Sell $${fmt(sellVal(p))}</button></div>`;placeAt(ctxEl,e);
   $('#cx1').onclick=()=>{unhang(p.id);hideCtx()};$('#cx2').onclick=()=>{sellPainting(p.id);hideCtx()}}});
 renderer.domElement.addEventListener('pointermove',e=>{const h=pickAt(e);overEasel=!!h&&h.object.userData.slot==='easel';if(overEasel)lastPt=h.point;renderer.domElement.style.cursor=h?(overEasel?'crosshair':'pointer'):'default';
- if(h&&h.object.userData.slot==='cat'){tipEl.innerHTML=cat&&cat.cool>0?'🐈 The cat is napping':'🐈 Pet the cat';placeAt(tipEl,e)}else if(h&&h.object.userData.slot!=='easel'){const i=h.object.userData.slot,p=byId(S.hang[i]);tipEl.innerHTML=i>=slotsUnlocked()?'🔒 Locked frame':p?`<b>${esc(p.title)}</b> · ${RAR[p.rarity].n} · $${fmt(p.value)}`:'Empty frame — click to hang your best painting';placeAt(tipEl,e)}else tipEl.style.display='none'});
+ if(h&&h.object.userData.slot==='cat'){tipEl.innerHTML=cat&&cat.cool>0?'🐈 The cat is napping':'🐈 Pet the cat';placeAt(tipEl,e)}else if(h&&h.object.userData.slot==='thief'){tipEl.innerHTML='🦹 Catch the thief!';placeAt(tipEl,e)}else if(h&&h.object.userData.slot!=='easel'){const i=h.object.userData.slot,p=byId(S.hang[i]);tipEl.innerHTML=i>=slotsUnlocked()?'🔒 Locked frame':p?`<b>${esc(p.title)}</b> · ${RAR[p.rarity].n} · $${fmt(p.value)}`:'Empty frame — click to hang your best painting';placeAt(tipEl,e)}else tipEl.style.display='none'});
 renderer.domElement.addEventListener('pointerleave',()=>{tipEl.style.display='none';overEasel=false});
 addEventListener('pointerup',()=>{brushing=false});
 
@@ -1006,13 +1055,15 @@ function update(dt,now){
   if(S.up.autohang){for(let i=0;i<slotsUnlocked();i++)if(!S.hang[i]){const best=S.inv.filter(q=>!isHung(q)).sort((a,b)=>b.value-a.value)[0];if(best)hangPainting(best.id,i);else break}}
   if(S.up.autosell){const cm=S.inv.filter(p=>!isHung(p)&&p.rarity===0&&!needed(p));if(cm.length>=3){let tot=0;cm.forEach(p=>{tot+=p.value;removePainting(p.id)});gain(tot);toast(`🧾 Dealer sold ${cm.length} Commons · $${fmt(tot)}`)}}}
  // events
- T.visit-=dt;if(T.visit<=0){T.visit=spawnInterval();const rk=rankIdx();spawnVisitor(rk>=2&&Math.random()<.04?'vip':Math.random()<.2+.04*rk+.02*S.up.agent+(sp$('dealer')?.08:0)?'collector':'tourist')}
+ T.visit-=dt;if(T.visit<=0){T.visit=spawnInterval();const rk=rankIdx();spawnVisitor(rk>=2&&Math.random()<(FX.gala>0?.3:.04)?'vip':Math.random()<.2+.04*rk+.02*S.up.agent+(sp$('dealer')?.08:0)?'collector':'tourist')}
+ if(DF().thief&&S.done>=5&&rankIdx()>=3&&hungList().length>=2){T.thief-=dt;if(T.thief<=0){T.thief=rnd(200,320)/DF().thief*(1+.25*S.up.security);
+  if(Math.random()<.18*S.up.security){S.st.thieves++;gain(Math.round(passive()*30+baseStroke()*40));toast('💂 Your guard caught a thief at the door!')}else spawnVisitor('thief')}}
  if(S.done>=1){T.muse-=dt;if(T.muse<=0){T.muse=(28-1.5*S.up.muse)*rnd(.7,1.3);spawnMuse()}
   T.order-=dt;if(T.order<=0){T.order=rnd(35,55);if(S.orders.length<3)newOrder()}}
  if(S.done>=3&&hungList().length){T.critic-=dt*(FX.press>0?2:1);if(T.critic<=0){T.critic=rnd(150,220);spawnVisitor('critic');toast('🧐 An art critic has arrived…')}}
  if(S.done>=2){T.fair-=dt;if(T.fair<=0){T.fair=rnd(300,420);fairStart()}}
  if(THEME.left>0)THEME.left-=dt;else if(S.done>=2){T.theme-=dt;if(T.theme<=0){T.theme=rnd(360,540);if(hungList().length)startTheme()}}
- if(FX.fair>0)FX.fair-=dt;for(const k of ['esp','open','press'])if(FX[k]>0)FX[k]=Math.max(0,FX[k]-dt);
+ if(FX.fair>0)FX.fair-=dt;for(const k of ['esp','open','press','gala'])if(FX[k]>0)FX[k]=Math.max(0,FX[k]-dt);
  tickAuctions(dt);for(const o of S.offers)o.left-=dt;const eo=S.offers.length;S.offers=S.offers.filter(o=>o.left>0&&byId(o.pid));if(S.offers.length!==eo)dirty.orders=true;
  for(const o of S.orders)o.left-=dt;const ec=S.orders.length;S.orders=S.orders.filter(o=>o.left>0);if(S.orders.length!==ec){dirty.orders=true;toast('A commission expired')}
  if(muse){muse.t-=dt;const [sx,sy]=toScreen(muse.ox,2.4+muse.oy,2.1);muse.el.style.left=sx+'px';muse.el.style.top=sy+'px';if(muse.t<=0){muse.el.remove();muse=null}}
@@ -1071,7 +1122,7 @@ if(!S.goals.length)newGoals();else dirty.goals=true;
 if(returning){const away=(NOW()-S.seen)/1000;if(away>90)offlineGain(Math.min(away,36000),true)}
 setTimeout(()=>{S.cur.style=S.cur.progress?S.cur.style:S.style},0);
 refreshHUD();requestAnimationFrame(animate);musicLoop();
-if(!returning)setTimeout(()=>modal('Welcome to Little Gallery',`Your goal: open <b>The Grand Retrospective</b>. It is a long road of <b>8 chapters</b>, one city each, and at least <b>40 real days</b> end to end. To move to the next venue you must earn enough, <b>donate paintings</b> to its new wing, and wait out its <b>real-time renovation</b>, which keeps ticking while the game is closed. Come back daily for the patron's gift. Your progress is saved in this browser only, so use <b>Backup &amp; restore</b> in the Career tab now and then.<br><br>Click or hold the easel to begin.`,[["Let's paint",null,'pri']]),700);
+if(!returning)setTimeout(()=>modal('Welcome to Little Gallery',`Your goal: open <b>The Grand Retrospective</b>. It is a long road of <b>8 chapters</b>, one city each, and at least <b>40 real days</b> end to end. To move to the next venue you must earn enough, <b>donate paintings</b> to its new wing, and wait out its <b>real-time renovation</b>, which keeps ticking while the game is closed. Come back daily for the patron's gift. Your progress is saved in this browser only, so use <b>Backup &amp; restore</b> in the Career tab now and then.<br><br>This edition starts on <b>Hard</b>: change the difficulty any time in the Career tab.<br><br>Click or hold the easel to begin.`,[["Let's paint",null,'pri']]),700);
 addEventListener('storage',e=>{if(e.key===OWN&&e.newValue&&e.newValue!==TAB)pauseTab()});addEventListener('beforeunload',save);document.addEventListener('visibilitychange',()=>{if(document.hidden)save()});
 window.__lgBoot=1;setInterval(slowTick,1000);slowTick();
 setTimeout(()=>$('#loading').classList.add('done'),500);
