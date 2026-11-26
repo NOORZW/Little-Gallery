@@ -145,6 +145,11 @@ button{font-family:inherit;color:inherit}
 .cab-meter .track i{display:block;height:100%;width:0;background:linear-gradient(90deg,#e5b95e,#e98169);border-radius:6px;transition:width .5s}
 .cab-meter .bonus{font:500 11px 'DM Mono',monospace;color:#658768;white-space:nowrap}
 .cab-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;overflow-y:auto;padding:2px}
+/* fix: give the cabinet a bounded height so the trophy grid scrolls instead of overflowing */
+.cabinet{grid-template-rows:minmax(0,1fr);padding:4vh 0;box-sizing:border-box}
+.cab-panel{max-height:100%;min-height:0;overflow:scroll}
+.cab-head,.cab-meter{flex:none}
+.cab-grid{flex:1 1 auto;min-height:0;align-content:start;grid-auto-rows:max-content;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 .card{position:relative;background:#fffdfa;border:1px solid #e8e1d6;border-radius:18px;padding:14px 10px 12px;text-align:center;display:flex;flex-direction:column;align-items:center}
 .card svg{width:68px;height:auto;display:block;margin-bottom:8px;transition:.3s}
 .card.got{background:linear-gradient(#fffaf0,#fff4dc);border-color:#e6cf9a}.card.got:hover svg{transform:translateY(-3px) rotate(-3deg) scale(1.06)}
@@ -192,7 +197,7 @@ button{font-family:inherit;color:inherit}
  </aside>
  <main class="main" id="main"><div class="scene" id="scene"></div>
   <div class="topbar"><div class="location"><b id="locName">The Sunroom</b><small id="locSub">Open daily · Est. just now</small></div>
-   <div class="top-actions"><button class="trophy-btn" id="trophy" aria-label="Open trophy cabinet"><span>🏆</span><span class="label">Trophies</span><span class="count" id="trophyCount">0/60</span><i class="dot"></i></button><button class="sound" id="sound" aria-label="Toggle sound">♫</button><button class="sound" id="power" aria-label="Toggle low-power mode" title="Low-power mode">🔋</button></div></div>
+   <div class="top-actions"><button class="trophy-btn" id="trophy" aria-label="Open trophy cabinet"><span>🏆</span><span class="label">Trophies</span><span class="count" id="trophyCount">0/92</span><i class="dot"></i></button><button class="sound" id="sound" aria-label="Toggle sound">♫</button><button class="sound" id="power" aria-label="Toggle low-power mode" title="Low-power mode">🔋</button></div></div>
   <div class="banner" id="banner"></div>
   <div class="hint" id="hint"></div>
   <div class="dock"><div class="styles" id="styles"></div><div class="styles" id="sizes"></div><div class="styles" id="moods"></div>
@@ -201,7 +206,7 @@ button{font-family:inherit;color:inherit}
   <div id="toasts" role="status" aria-live="polite"></div><div class="ach-toast" id="achToast"></div><div class="tip" id="tip"></div><div class="ctx" id="ctx"></div>
   <div class="cabinet" id="cabinet" role="dialog" aria-modal="true" aria-label="Trophy Cabinet"><div class="cab-panel">
    <div class="cab-head"><div><h2>Trophy Cabinet</h2><p>Every trophy you earn sweetens all your earnings by 2%. They stay with you when you relocate.</p></div><button class="cab-close" id="cabClose" aria-label="Close">✕</button></div>
-   <div class="cab-meter"><span class="num" id="cabCount">0 / 20</span><div class="track"><i id="cabBar"></i></div><span class="bonus" id="cabBonus">+0% to all earnings</span></div>
+   <div class="cab-meter"><span class="num" id="cabCount">0 / 92</span><div class="track"><i id="cabBar"></i></div><span class="bonus" id="cabBonus">+0% to all earnings</span></div>
    <div class="cab-grid" id="cabGrid"></div></div></div>
   <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle"><div class="mbox"><h3 id="mTitle"></h3><div class="b" id="mBody"></div><div class="mbtns" id="mBtns"></div></div></div>
   <div class="loading" id="loading">Setting up your little gallery…</div>
