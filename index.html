@@ -582,6 +582,7 @@ const brushMesh=new THREE.Mesh(new THREE.CylinderGeometry(.035,.035,.9,8),mat('#
 const medals={};
 function badgeTexture(a){const c=document.createElement('canvas');c.width=160;c.height=192;const tex=new THREE.CanvasTexture(c);tex.colorSpace=THREE.SRGBColorSpace;tex.anisotropy=4;const img=new Image();img.onload=()=>{c.getContext('2d').drawImage(img,0,0,160,192);tex.needsUpdate=true};img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(badge(a));return tex}
 for(const side of [-1,1])for(const py of [1.7,.65])box(2.1,.07,.3,mat('#a5764f'),side*5.7,py,-3.25);
+const TIER_ORDER = { bronze: 0, silver: 1, gold: 2 };
 const ACH=[
  {id:'first',name:'First Stroke',desc:'Make your very first brushstroke.',tier:'bronze',goal:1,val:()=>S.strokes},
  {id:'daily',name:'Warming Up',desc:'Complete 30 brushstrokes.',tier:'bronze',goal:30,val:()=>S.strokes},
@@ -674,7 +675,7 @@ const ACH=[
  {id:'hag5',name:'Hard Bargain',desc:'Win 5 haggles with collectors.',tier:'silver',goal:5,val:()=>S.st.hags,emoji:'🎲'},
  {id:'heir9',name:'Family Heirlooms',desc:'Carry 9 paintings across your moves.',tier:'silver',goal:9,val:()=>S.st.heir,emoji:'🖼️'},
  {id:'winter1',name:'First Snow',desc:'Paint a Winter Village.',tier:'silver',goal:1,val:()=>S.st.winters,emoji:'❄️'},
- {id:'hard1b',name:'Hard Earned',desc:'Earn $1,000,000,000 in total on Hard or Brutal.',tier:'gold',goal:1e9,val:()=>DF().earn<=.5?S.lifetime:0,emoji:'🔥',money:1}];
+ {id:'hard1b',name:'Hard Earned',desc:'Earn $1,000,000,000 in total on Hard or Brutal.',tier:'gold',goal:1e9,val:()=>DF().earn<=.5?S.lifetime:0,emoji:'🔥',money:1}].sort((a, b) => TIER_ORDER[a.tier] - TIER_ORDER[b.tier]);
 ACH.slice(0,12).forEach((a,i)=>{const side=i<6?-1:1,j=i%6,row=Math.floor(j/3),col=j%3;
  const m=new THREE.Mesh(new THREE.PlaneGeometry(.5,.6),new THREE.MeshBasicMaterial({map:badgeTexture(a),transparent:true,color:'#2f2b26',opacity:.3}));
  m.position.set(side*5.7+(col-1)*.64,(row?.65:1.7)+.035+.3,-3.08);m.userData.base=m.position.y;scene.add(m);medals[a.id]=m});
