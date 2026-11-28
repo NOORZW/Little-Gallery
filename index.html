@@ -98,7 +98,7 @@ button{font-family:inherit;color:inherit}
 @keyframes pulse{50%{transform:scale(1.35)}}
 .banner{position:absolute;top:20px;left:50%;transform:translate(-50%,-80px);background:linear-gradient(90deg,#e98169,#e5b95e);color:#2b1e10;padding:9px 18px;border-radius:30px;font-weight:700;font-size:12px;box-shadow:0 8px 24px #4a2c1a33;transition:transform .4s;z-index:4;white-space:nowrap}
 .banner.show{transform:translate(-50%,0)}
-.hint{position:absolute;bottom:166px;left:50%;transform:translateX(-50%);background:#292822df;color:#fff8e9;border-radius:30px;padding:9px 16px;font-size:11px;white-space:nowrap;box-shadow:0 5px 18px #241a1830;pointer-events:none;max-width:92%;overflow:hidden;text-overflow:ellipsis}
+.hint{position:absolute;bottom:206px;left:50%;transform:translateX(-50%);background:#292822df;color:#fff8e9;border-radius:30px;padding:9px 16px;font-size:11px;white-space:nowrap;box-shadow:0 5px 18px #241a1830;pointer-events:none;max-width:92%;overflow:hidden;text-overflow:ellipsis}
 .hint b{color:#f2c86e}
 .dock{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);width:min(640px,calc(100% - 28px));background:#fbf8f0ee;backdrop-filter:blur(10px);border-radius:18px;padding:10px 12px;box-shadow:0 10px 34px #30271a25;z-index:3}
 .styles{display:flex;gap:6px;margin-bottom:9px;overflow-x:auto;padding-bottom:2px}
@@ -109,6 +109,7 @@ button{font-family:inherit;color:inherit}
 .meters{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .m{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;font:500 10px 'DM Mono',monospace;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
 .m .bar{height:7px;border-radius:6px;background:#ddd3c0;overflow:hidden}.m .bar i{display:block;height:100%;width:0;border-radius:6px}
+#tBarW{position:relative;overflow:visible!important}#tZone{position:absolute;top:0;bottom:0;border-radius:6px;background:#9ec5a3;display:block;font-style:normal}#tCur{position:absolute;top:-2px;width:4px;height:11px;border-radius:2px;background:#25231f;transform:translateX(-2px);display:block;font-style:normal}
 #pBar{background:linear-gradient(90deg,#9ec5a3,#698f82)}#fBar{background:linear-gradient(90deg,#e5b95e,#e98169)}
 .m span{color:var(--ink);min-width:34px;text-align:right}
 #toasts{position:absolute;top:76px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:6px;align-items:center;pointer-events:none;z-index:6}
@@ -144,6 +145,11 @@ button{font-family:inherit;color:inherit}
 .cab-meter .track i{display:block;height:100%;width:0;background:linear-gradient(90deg,#e5b95e,#e98169);border-radius:6px;transition:width .5s}
 .cab-meter .bonus{font:500 11px 'DM Mono',monospace;color:#658768;white-space:nowrap}
 .cab-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;overflow-y:auto;padding:2px}
+/* fix: give the cabinet a bounded height so the trophy grid scrolls instead of overflowing */
+.cabinet{grid-template-rows:minmax(0,1fr);padding:4vh 0;box-sizing:border-box}
+.cab-panel{max-height:100%;min-height:0;overflow:scroll}
+.cab-head,.cab-meter{flex:none}
+.cab-grid{flex:1 1 auto;min-height:0;align-content:start;grid-auto-rows:max-content;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 .card{position:relative;background:#fffdfa;border:1px solid #e8e1d6;border-radius:18px;padding:14px 10px 12px;text-align:center;display:flex;flex-direction:column;align-items:center}
 .card svg{width:68px;height:auto;display:block;margin-bottom:8px;transition:.3s}
 .card.got{background:linear-gradient(#fffaf0,#fff4dc);border-color:#e6cf9a}.card.got:hover svg{transform:translateY(-3px) rotate(-3deg) scale(1.06)}
@@ -164,7 +170,7 @@ button{font-family:inherit;color:inherit}
  .brand,.goals,.reset{display:none}.wallet{padding:8px 12px;margin-bottom:8px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
  .wallet-label{display:none}.cash{font-size:22px;margin:0}.wrow{margin:0;flex:1}.tabs{margin-bottom:6px}
  .trophy-btn .label{display:none}.ach-toast{right:12px;top:66px;max-width:calc(100% - 24px)}.cab-panel{padding:18px 16px}.cab-grid{grid-template-columns:repeat(2,1fr)}.cab-meter .bonus{display:none}
- .topbar{top:10px;left:10px;right:10px}.hint{bottom:150px;font-size:10px}.meters{grid-template-columns:1fr;gap:6px}.dock{bottom:8px;padding:8px 10px}.styles{margin-bottom:6px}
+ .topbar{top:10px;left:10px;right:10px}.hint{bottom:190px;font-size:10px}.meters{grid-template-columns:1fr;gap:6px}.dock{bottom:8px;padding:8px 10px}.styles{margin-bottom:6px}
 }
 </style>
 </head>
@@ -191,16 +197,16 @@ button{font-family:inherit;color:inherit}
  </aside>
  <main class="main" id="main"><div class="scene" id="scene"></div>
   <div class="topbar"><div class="location"><b id="locName">The Sunroom</b><small id="locSub">Open daily · Est. just now</small></div>
-   <div class="top-actions"><button class="trophy-btn" id="trophy" aria-label="Open trophy cabinet"><span>🏆</span><span class="label">Trophies</span><span class="count" id="trophyCount">0/60</span><i class="dot"></i></button><button class="sound" id="sound" aria-label="Toggle sound">♫</button><button class="sound" id="power" aria-label="Toggle low-power mode" title="Low-power mode">🔋</button></div></div>
+   <div class="top-actions"><button class="trophy-btn" id="trophy" aria-label="Open trophy cabinet"><span>🏆</span><span class="label">Trophies</span><span class="count" id="trophyCount">0/92</span><i class="dot"></i></button><button class="sound" id="sound" aria-label="Toggle sound">♫</button><button class="sound" id="power" aria-label="Toggle low-power mode" title="Low-power mode">🔋</button></div></div>
   <div class="banner" id="banner"></div>
   <div class="hint" id="hint"></div>
-  <div class="dock"><div class="styles" id="styles"></div><div class="styles" id="sizes"></div>
+  <div class="dock"><div class="styles" id="styles"></div><div class="styles" id="sizes"></div><div class="styles" id="moods"></div>
    <div class="meters"><div class="m"><label id="pLabel">Painting</label><div class="bar"><i id="pBar"></i></div><span id="pTxt">0/12</span></div>
-    <div class="m"><label>Flow</label><div class="bar"><i id="fBar"></i></div><span id="fTxt">×1.0</span></div></div></div>
+    <div class="m"><label>Timing</label><div class="bar" id="tBarW"><em id="tZone"></em><em id="tCur"></em></div><span id="tTxt">-</span></div><div class="m"><label>Flow</label><div class="bar"><i id="fBar"></i></div><span id="fTxt">×1.0</span></div></div></div>
   <div id="toasts" role="status" aria-live="polite"></div><div class="ach-toast" id="achToast"></div><div class="tip" id="tip"></div><div class="ctx" id="ctx"></div>
   <div class="cabinet" id="cabinet" role="dialog" aria-modal="true" aria-label="Trophy Cabinet"><div class="cab-panel">
    <div class="cab-head"><div><h2>Trophy Cabinet</h2><p>Every trophy you earn sweetens all your earnings by 2%. They stay with you when you relocate.</p></div><button class="cab-close" id="cabClose" aria-label="Close">✕</button></div>
-   <div class="cab-meter"><span class="num" id="cabCount">0 / 20</span><div class="track"><i id="cabBar"></i></div><span class="bonus" id="cabBonus">+0% to all earnings</span></div>
+   <div class="cab-meter"><span class="num" id="cabCount">0 / 92</span><div class="track"><i id="cabBar"></i></div><span class="bonus" id="cabBonus">+0% to all earnings</span></div>
    <div class="cab-grid" id="cabGrid"></div></div></div>
   <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle"><div class="mbox"><h3 id="mTitle"></h3><div class="b" id="mBody"></div><div class="mbtns" id="mBtns"></div></div></div>
   <div class="loading" id="loading">Setting up your little gallery…</div>
@@ -233,7 +239,8 @@ const STYLES=[
  {id:'desert',name:'Dune Light',icon:'🏜️',unlock:800,nouns:['Dunes','Caravan Hour','Red Mesa','Mirage','Dry Wind']},
  {id:'blossom',name:'Blossom Wind',icon:'🌸',unlock:2000,nouns:['Blossom','Hanami','Petal Fall','Spring Branch','Soft Rain']},
  {id:'aurora',name:'Northern Lights',icon:'🌌',unlock:3500,nouns:['Aurora','Ribbon Sky','Polar Hush','Green Veil','Frostlight']},
- {id:'cavern',name:'Crystal Cavern',icon:'🔮',unlock:8000,nouns:['Geode','Glow Vault','Prism Hall','Deepwater','Amethyst']}];
+ {id:'cavern',name:'Crystal Cavern',icon:'🔮',unlock:8000,nouns:['Geode','Glow Vault','Prism Hall','Deepwater','Amethyst']},
+ {id:'winter',name:'Winter Village',icon:'❄️',unlock:20000,nouns:['Snowfall','Hearth Light','Frost Lane','White Hush','First Snow']}];
 const STY=Object.fromEntries(STYLES.map(s=>[s.id,s]));
 const ADJ=['Quiet','Golden','Distant','Soft','Wild','Hidden','Gentle','Bright','Lonely','Warm','Brave','Dreaming'];
 const RAR=[{n:'Common',m:1,c:'#a98962'},{n:'Fine',m:2.2,c:'#7fae9c'},{n:'Rare',m:5,c:'#7d8fc9'},{n:'Masterpiece',m:14,c:'#e5b95e'},{n:'Legendary',m:40,c:'#c77d9e'}];
@@ -249,10 +256,12 @@ const CITIES=[
  {n:'The Rotunda',sub:'The Grand Retrospective',wall:'#efe4cf',side:'#e8dbc2',floor:'#5f4b3a',bg:'#cfc4ad'}];
 const UPS=[
  {k:'brush',icon:'🖌️',name:'Better brushes',desc:'+$2 per stroke · finer paintings',base:15,g:1.58,max:99},
+ {k:'steady',icon:'🎯',name:'Steady hand',desc:'Wider Perfect zone · bigger combos',base:300,g:1.6,max:8},
  {k:'assistant',icon:'🧑‍🎨',name:'Hire an artist',desc:'Each paints 0.5 strokes/sec for you',base:50,g:1.58,max:99},
  {k:'room',icon:'🖼️',name:'Expand the gallery',desc:'Unlocks a frame · draws more visitors',base:120,g:1.75,max:5},
  {k:'market',icon:'📣',name:'Marketing',desc:'Visitors arrive more often',base:80,g:1.6,max:15},
  {k:'light',icon:'💡',name:'Gallery lighting',desc:'+15% exhibit income & tips',base:200,g:1.7,max:10},
+ {k:'palette',icon:'🎨',name:'Color theory',desc:'Wall harmony triggers with fewer styles hung',base:2500,g:3,max:2},
  {k:'muse',icon:'🪄',name:'Muse lamp',desc:'More inspiration, slower flow decay',base:150,g:1.65,max:10},
  {k:'storage',icon:'📦',name:'Storage racks',desc:'+6 painting storage',base:60,g:1.5,max:8},
  {k:'mentor',icon:'🎓',name:'Atelier mentor',desc:'+1.5% painting quality · rarer art',base:400,g:1.75,max:10},
@@ -281,7 +290,7 @@ const BUYERS=['Mx. Ferreira','Dr. Okafor','Madame Lenoir','Mr. Tanaka','Ms. Alva
 const GOALTPL=[
  {k:'stroke',t:n=>`Make ${n} brushstrokes`,tg:r=>20+r*12},{k:'paint',t:n=>`Finish ${n} painting${n>1?'s':''}`,tg:r=>2+(r>>1)},
  {k:'hang',t:n=>`Hang ${n} painting${n>1?'s':''}`,tg:r=>2},{k:'sell',t:n=>`Accept ${n} offer${n>1?'s':''}`,tg:r=>1+(r>2?1:0)},
- {k:'visit',t:n=>`Welcome ${n} visitors`,tg:r=>6+r*3},{k:'order',t:n=>`Deliver ${n} commission${n>1?'s':''}`,tg:r=>1}];
+ {k:'visit',t:n=>`Welcome ${n} visitors`,tg:r=>6+r*3},{k:'order',t:n=>`Deliver ${n} commission${n>1?'s':''}`,tg:r=>1},{k:'perfect',t:n=>`Land ${n} Perfect strokes`,tg:r=>6+r*3},{k:'tour',t:n=>`Give ${n} visitor tour${n>1?'s':''}`,tg:r=>1+(r>>1)}];
 
 /* ===== medal art (kept from the original) ===== */
 const TIER={bronze:{ring:'#c98b5a',dark:'#9b6540',ribbon:'#e98169',label:'Bronze'},silver:{ring:'#cfd4d8',dark:'#98a0a8',ribbon:'#7fae9c',label:'Silver'},gold:{ring:'#f1c966',dark:'#c28f2c',ribbon:'#c9574e',label:'Gold'}};
@@ -307,15 +316,15 @@ const _bc={};const badge=a=>_bc[a.id]||(_bc[a.id]=badgeRaw(a));function badgeRaw
 /* ================= STATE ================= */
 const KEY='littleGallery3',SAVE_VER=4,TAB=Math.random().toString(36).slice(2),OWN=KEY+':owner';try{localStorage.setItem(OWN,TAB)}catch(e){}
 const randSeed=()=>Math.floor(Math.random()*1e9);
-const newCur=(style,size='m')=>{const z=SZ[size]||SZ.m;return{progress:0,seed:randSeed(),style,flowSum:0,n:0,bonus:0,size:z.id,need:z.need,vm:z.vm,sb:z.bonus}};
-const defaults=()=>({cash:0,lifetime:0,run:0,strokes:0,done:0,rep:0,stars:0,moves:0,up:{brush:0,assistant:0,room:0,light:0,market:0,muse:0,storage:0,mentor:0,agent:0,patron:0,autosell:0,autohang:0,sitters:0,salesroom:0,docents:0,cat:0,security:0,gilder:0,foundation:0},inv:[],auc:[],lowp:false,hang:Array(8).fill(null),style:'sunrise',size:'m',cur:newCur('sunrise'),orders:[],offers:[],goals:[],st:{sales:0,orders:0,visitors:0,tips:0,masters:0,rares:0,hangs:0,legends:0,critics:0,fairs:0,goals:0,donated:0,pets:0,auctions:0,murals:0,vips:0,thieves:0,lost:0,caverns:0,frescos:0},ach:[],seen:NOW(),nid:1,sound:true,born:NOW(),bk:NOW(),chStart:NOW(),wing:[],won:0,spec:null,clients:{},ver:SAVE_VER,diff:2,notify:false,ntf:-1,day:{last:0,streak:0,total:0,claimed:0,freeze:1,fweek:0}});
+const newCur=(style,size='m')=>{const z=SZ[size]||SZ.m;return{progress:0,seed:randSeed(),style,flowSum:0,n:0,bonus:0,perf:0,size:z.id,need:z.need,vm:z.vm,sb:z.bonus}};
+const defaults=()=>({cash:0,lifetime:0,run:0,strokes:0,done:0,rep:0,stars:0,moves:0,up:{brush:0,assistant:0,room:0,light:0,market:0,muse:0,storage:0,mentor:0,agent:0,patron:0,autosell:0,autohang:0,sitters:0,salesroom:0,docents:0,cat:0,security:0,gilder:0,foundation:0,steady:0,palette:0},inv:[],auc:[],lowp:false,hang:Array(8).fill(null),style:'sunrise',size:'m',cur:newCur('sunrise'),orders:[],offers:[],goals:[],st:{sales:0,orders:0,visitors:0,tips:0,masters:0,rares:0,hangs:0,legends:0,critics:0,fairs:0,goals:0,donated:0,pets:0,auctions:0,murals:0,vips:0,thieves:0,lost:0,caverns:0,frescos:0,perfect:0,tours:0,hags:0,heir:0,winters:0},ach:[],seen:NOW(),nid:1,sound:true,born:NOW(),bk:NOW(),chStart:NOW(),wing:[],won:0,spec:null,clients:{},mood:'auto',focus:'volume',ver:SAVE_VER,diff:1,notify:false,ntf:-1,day:{last:0,streak:0,total:0,claimed:0,freeze:1,fweek:0}});
 let S=defaults(),returning=false;
 try{const raw=localStorage.getItem(KEY);
  if(raw){const o=JSON.parse(raw);S=Object.assign(defaults(),o);S.up=Object.assign(defaults().up,o.up);S.st=Object.assign(defaults().st,o.st);S.day=Object.assign(defaults().day,o.day);{const from=o.ver||3;S.ver=SAVE_VER;/* migrations by version go here; v4 only added fields that defaults() already supplies */if(from<4&&!S.clients)S.clients={}}returning=true}
 
 }catch(e){}
 if(!Array.isArray(S.hang))S.hang=[];
-S.inv=(Array.isArray(S.inv)?S.inv:[]).filter(p=>p&&STY[p.style]).map(p=>({id:Math.floor(+p.id)||0,seed:Math.floor(+p.seed)||1,style:p.style,rarity:clamp(Math.floor(+p.rarity)||0,0,4),title:String(p.title||'Untitled').slice(0,60),value:Math.max(0,Math.round(+p.value)||0)}));
+S.inv=(Array.isArray(S.inv)?S.inv:[]).filter(p=>p&&STY[p.style]).map(p=>({id:Math.floor(+p.id)||0,seed:Math.floor(+p.seed)||1,style:p.style,rarity:clamp(Math.floor(+p.rarity)||0,0,4),title:String(p.title||'Untitled').slice(0,60),value:Math.max(0,Math.round(+p.value)||0),locked:!!p.locked}));
 S.orders=(Array.isArray(S.orders)?S.orders:[]).filter(o=>o&&STY[o.style]&&typeof o.client==='string').map(o=>({...o,id:Math.floor(+o.id)||0,minR:clamp(Math.floor(+o.minR)||0,0,4),client:o.client.slice(0,40),brief:o.brief&&((o.brief.t==='title'&&ADJ.includes(o.brief.adj))||(o.brief.t==='mood'&&MOODS[o.brief.mood]))?o.brief:null}));
 S.offers=(Array.isArray(S.offers)?S.offers:[]).filter(o=>o&&typeof o.buyer==='string').map(o=>({...o,id:Math.floor(+o.id)||0,pid:Math.floor(+o.pid)||0,buyer:o.buyer.slice(0,40)}));
 S.auc=(Array.isArray(S.auc)?S.auc:[]).filter(a=>a&&typeof a.title==='string').map(a=>({title:a.title.slice(0,60),rarity:clamp(Math.floor(+a.rarity)||0,0,4),left:+a.left||0,price:Math.max(0,Math.round(+a.price)||0),bids:0}));
@@ -323,21 +332,26 @@ S.clients=Object.fromEntries(Object.entries(S.clients&&typeof S.clients==='objec
 while(S.hang.length<8)S.hang.push(null);
 S.hang=S.hang.map(id=>S.inv.some(p=>p.id===id)?id:null);
 if(!STY[S.style])S.style='sunrise';if(!SZ[S.size])S.size='m';if(!S.cur||!S.cur.seed||!STY[S.cur.style])S.cur=newCur(S.style,S.size);
-if(S.spec&&!SPEC[S.spec])S.spec=null;if(!S.clients||typeof S.clients!=='object')S.clients={};S.diff=DIFFS[S.diff]?S.diff:2;
+if(S.spec&&!SPEC[S.spec])S.spec=null;if(!S.clients||typeof S.clients!=='object')S.clients={};S.diff=DIFFS[S.diff]?S.diff:1;if(!['auto','serene','radiant','wistful'].includes(S.mood))S.mood='auto';if(S.focus!=='craft')S.focus='volume';
 const got=new Set(S.ach);
 const flow={v:0,last:0},FX={fair:0,esp:0,open:0,press:0,gala:0};
+let combo=0,zoneC=.5,tPhase=0,tLast=performance.now();const timPos=()=>{const x=tPhase%2;return x<1?x:2-x},zoneHalf=()=>.09+.012*S.up.steady,timSpeed=()=>.0011*(1+.05*combo),newZone=()=>{const z=zoneHalf();return z+Math.random()*(1-2*z)};
 const byId=id=>S.inv.find(p=>p.id===id);
+const moodOf=t=>Object.keys(MOODS).find(k=>MOODS[k].adj.includes(String(t).split(' ')[0])),titleAdj=c=>(S.mood!=='auto'&&MOODS[S.mood])?MOODS[S.mood].adj[c.seed%4]:ADJ[c.seed%ADJ.length];
 const isHung=p=>S.hang.includes(p.id);
+const lockedCount=()=>S.inv.filter(p=>p.locked).length,maxLocks=()=>Math.max(1,capacity()>>1);
 const rankIdx=()=>{let r=0;RANKS.forEach((x,i)=>{if(S.rep>=x[0])r=i});return r};
 const sp$=k=>S.spec===k,portM=()=>sp$('portrait')?1.2+.06*S.up.sitters:1,portOrd=()=>sp$('portrait')?1.15+.04*S.up.sitters:1,dealM=()=>sp$('dealer')?1.2+.06*S.up.salesroom:1,dealSlots=()=>sp$('dealer')?2+(S.up.salesroom/3|0):0,curM=()=>sp$('curator')?1.3+.1*S.up.docents:1,sellVal=p=>Math.round(p.value*(sp$('dealer')?1.15:1));
 const boostCost=b=>Math.round(60+(passive()+baseStroke()*4)*b.mul);
-let specKey='';
+let specKey='',focusKey='';
+function renderFocus(){const el=$('#focusBox');if(!S.up.assistant){el.innerHTML='';return}const cr=S.focus==='craft';
+ el.innerHTML=`<div class="card-block"><div class="row"><b>🧑‍🎨 Artist focus</b><span class="rbadge ${cr?'r3':'r1'}">${cr?'Craft':'Volume'}</span></div><small>${cr?'Artists paint carefully: −35% pay, but their strokes raise painting quality.':'Artists paint fast: full pay, no quality bonus.'}</small><div class="acts"><button class="mini ${cr?'':'pri'}" data-focus="volume">Volume</button><button class="mini ${cr?'pri':''}" data-focus="craft">Craft</button></div></div>`}
 function renderSpec(){const el=$('#specBox'),rk=rankIdx();
  if(rk<3){el.innerHTML='<div class="card-block"><small>🔒 At <b>Respected</b> rank (300 rep) you can specialize as a Portraitist, Dealer or Curator.</small></div>';return}
  if(!S.spec){el.innerHTML='<div class="card-block offer"><div class="row"><b>🧭 Choose your path</b></div><small>Your studio can specialize. You can pick again after each relocation.</small>'+Object.entries(SPEC).map(([k,s])=>`<div class="req"><div class="row"><b>${s.icon} ${s.n}</b></div><small>${s.d}</small><div class="acts"><button class="mini pri" data-spec="${k}">Become a ${s.n}</button></div></div>`).join('')+'</div>';return}
  const s=SPEC[S.spec];el.innerHTML=`<div class="card-block"><div class="row"><b>${s.icon} ${s.n}</b><span class="rbadge r3">Specialization</span></div><small>${s.d}</small></div>`}
 function pauseTab(){if(paused)return;paused=true;noSave=true;modal('Open in another tab','Little Gallery is running in another tab, so this one is paused to keep your save safe. Take over here to continue from the latest progress.',[['Take over here',()=>location.reload(),'pri']])}
-const DF=()=>DIFFS[S.diff]||DIFFS[2];
+const DF=()=>DIFFS[S.diff]||DIFFS[1];
 const mult=()=>(1+.02*got.size)*(1+.08*S.stars)*Math.pow(1.6,Math.min(S.moves,20))*(1+.05*S.up.patron)*DF().earn*Math.pow(1.03,S.up.foundation);
 const slotsUnlocked=()=>Math.min(8,3+S.up.room);
 const capacity=()=>12+6*S.up.storage;
@@ -345,7 +359,7 @@ const hungList=()=>S.hang.map((id,i)=>id&&i<slotsUnlocked()&&byId(id)?byId(id):n
 const baseStroke=()=>(1+S.up.brush*2)*mult();
 const paintBase=()=>18*(1+.45*S.up.brush)*mult()*portM()*(1+.04*S.up.gilder);
 const THEME={style:null,left:0};
-const harmony=()=>{const n=new Set(hungList().map(p=>p.style)).size;return n>=5?1.3:n>=3?1.15:1};
+const harmony=()=>{const n=new Set(hungList().map(p=>p.style)).size;const lv=S.up.palette;return n>=5-lv?1.3:n>=3-(lv>0?1:0)?1.15:1};
 const exhibit=()=>hungList().reduce((s,p)=>s+p.value*.01*(THEME.left>0&&p.style===THEME.style?2.5:1),0)*harmony()*(1+.15*S.up.light)*(FX.fair>0?1.5:1)*curM();
 const passive=()=>S.up.assistant*.5*baseStroke()*1.1+exhibit();
 const unlockedStyles=()=>STYLES.filter(s=>S.rep>=s.unlock);
@@ -496,6 +510,20 @@ EXTRAS.cavern=[
  (g,w,h,P,R,A)=>{for(let i=0;i<7;i++){const x=R()*w,y=h*(.2+R()*.5);al(g,A,.5);g.fillStyle=P[1];g.beginPath();g.arc(x,y,9,0,7);g.fill();al(g,A);g.fillStyle=P[4];g.beginPath();g.arc(x,y,3.5,0,7);g.fill()}},
  (g,w,h,P,R,A)=>{const x=60+R()*120,y=h*.9,s=110+R()*50;al(g,A);g.fillStyle=P[2];g.beginPath();g.moveTo(x-22,y);g.lineTo(x-14,y-s*.8);g.lineTo(x,y-s);g.lineTo(x+14,y-s*.8);g.lineTo(x+22,y);g.closePath();g.fill();al(g,A,.4);g.fillStyle=P[4];g.beginPath();g.moveTo(x-22,y);g.lineTo(x-14,y-s*.8);g.lineTo(x,y-s);g.lineTo(x,y);g.closePath();g.fill()},
  (g,w,h,P,R,A)=>{al(g,A,.12);g.fillStyle=P[4];for(let i=0;i<3;i++){const x=R()*w;g.beginPath();g.moveTo(x,0);g.lineTo(x-20,h);g.lineTo(x+30,h);g.closePath();g.fill()}}];
+PAL.winter=[['#cfe0ee','#fff3d0','#8fb0cf','#34475f','#ffffff'],['#d8e4f0','#ffe3b0','#9ab8d4','#3a4560','#fbfdff'],['#c9dbe8','#ffd9a0','#7ea0c4','#2f3f58','#f4fbff']];
+LAYERS.winter=[
+ (g,w,h,P,R,A)=>grad(g,w,h,P[0],P[4],A),
+ (g,w,h,P,R,A)=>{const x=w*(.2+R()*.6),y=h*.3;al(g,A,.3);g.fillStyle=P[1];g.beginPath();g.arc(x,y,44,0,7);g.fill();al(g,A);g.beginPath();g.arc(x,y,22,0,7);g.fill()},
+ (g,w,h,P,R,A)=>hills(g,w,h,h*.62,36,R,P[2],A,.8),
+ (g,w,h,P,R,A)=>hills(g,w,h,h*.76,40,R,P[4],A,1),
+ (g,w,h,P,R,A)=>{al(g,A,.9);g.fillStyle=P[3];for(let i=0;i<6;i++)tree(g,20+i*40+R()*20,h*.78,60+R()*40)},
+ (g,w,h,P,R,A)=>hills(g,w,h,h*.9,22,R,P[4],A,1),
+ (g,w,h,P,R,A)=>dotsB(g,w,h,P,R,A,60,'#ffffff',0,h*.9)];
+EXTRAS.winter=[
+ (g,w,h,P,R,A)=>cabin(g,w,h,P,R,A,P[3],P[4],P[1]),
+ (g,w,h,P,R,A)=>fogB(g,w,h,P,R,A,h*.55),
+ shoot,
+ (g,w,h,P,R,A)=>{const x=40+R()*160,y=h*.84;al(g,A);g.fillStyle='#ffffff';g.strokeStyle=P[3];g.lineWidth=1.5;for(const [dy,r] of [[0,13],[-18,9],[-31,6]]){g.beginPath();g.arc(x,y+dy,r,0,7);g.fill();g.stroke()}g.fillStyle='#e98169';g.fillRect(x-1,y-31,8,2)}];
 const FINISH=[null,
  (g,w,h,P,R,A)=>{al(g,A,.22);const gr=g.createLinearGradient(0,h*.35,0,h);gr.addColorStop(0,'rgba(255,255,255,0)');gr.addColorStop(1,P[4]);g.fillStyle=gr;g.fillRect(0,0,w,h)},
  (g,w,h,P,R,A)=>{for(let i=0;i<160;i++){al(g,A,.05+R()*.12);g.fillStyle=R()<.5?'#ffffff':'#000000';g.fillRect(R()*w,R()*h,1+R()*1.5,1+R()*1.5)}},
@@ -638,6 +666,14 @@ const ACH=[
  {id:'found10',name:'Foundation Fund',desc:'Bring Art foundation to level 10.',tier:'silver',goal:10,val:()=>S.up.foundation,emoji:'🏦'},
  {id:'found40',name:'The Endowment',desc:'Max out the Art foundation.',tier:'gold',goal:40,val:()=>S.up.foundation,emoji:'💎'},
  {id:'gilder20',name:'Gilded Age',desc:'Max out Gilded frames.',tier:'gold',goal:20,val:()=>S.up.gilder,emoji:'🪞'},
+ {id:'perf50',name:'In the Zone',desc:'Land 50 Perfect strokes.',tier:'bronze',goal:50,val:()=>S.st.perfect,emoji:'🎯'},
+ {id:'perf500',name:'Metronome',desc:'Land 500 Perfect strokes.',tier:'silver',goal:500,val:()=>S.st.perfect,emoji:'🥁'},
+ {id:'perf5k',name:'Flawless Rhythm',desc:'Land 5,000 Perfect strokes.',tier:'gold',goal:5000,val:()=>S.st.perfect,emoji:'🎼'},
+ {id:'tour10',name:'Friendly Guide',desc:'Give 10 visitor tours.',tier:'bronze',goal:10,val:()=>S.st.tours,emoji:'🎫'},
+ {id:'tour100',name:'Tour de Force',desc:'Give 100 visitor tours.',tier:'silver',goal:100,val:()=>S.st.tours,emoji:'🧭'},
+ {id:'hag5',name:'Hard Bargain',desc:'Win 5 haggles with collectors.',tier:'silver',goal:5,val:()=>S.st.hags,emoji:'🎲'},
+ {id:'heir9',name:'Family Heirlooms',desc:'Carry 9 paintings across your moves.',tier:'silver',goal:9,val:()=>S.st.heir,emoji:'🖼️'},
+ {id:'winter1',name:'First Snow',desc:'Paint a Winter Village.',tier:'silver',goal:1,val:()=>S.st.winters,emoji:'❄️'},
  {id:'hard1b',name:'Hard Earned',desc:'Earn $1,000,000,000 in total on Hard or Brutal.',tier:'gold',goal:1e9,val:()=>DF().earn<=.5?S.lifetime:0,emoji:'🔥',money:1}];
 ACH.slice(0,12).forEach((a,i)=>{const side=i<6?-1:1,j=i%6,row=Math.floor(j/3),col=j%3;
  const m=new THREE.Mesh(new THREE.PlaneGeometry(.5,.6),new THREE.MeshBasicMaterial({map:badgeTexture(a),transparent:true,color:'#2f2b26',opacity:.3}));
@@ -763,7 +799,7 @@ const sFan=()=>[523,659,784,1047,1319,1568].forEach((f,i)=>tone(f,.6,'triangle',
 function musicLoop(){if(S.sound&&ac&&ac.state==='running'){const sc=[0,2,4,7,9,12,14,16],f=261.63*Math.pow(2,pick(sc)/12);tone(f,2.6,'sine',.02);if(Math.random()<.35)tone(f*1.5,2.6,'sine',.012,.15)}setTimeout(musicLoop,1400+Math.random()*1800)}
 
 /* ================= UI HELPERS ================= */
-function toast(s){const t=document.createElement('div');t.className='toast';t.textContent=s;$('#toasts').appendChild(t);while($('#toasts').children.length>4)$('#toasts').firstChild.remove();setTimeout(()=>t.remove(),2700)}
+let lastToast='',lastToastT=0;function toast(s){const nt=performance.now();if(s===lastToast&&nt-lastToastT<1200)return;lastToast=s;lastToastT=nt;const t=document.createElement('div');t.className='toast';t.textContent=s;$('#toasts').appendChild(t);while($('#toasts').children.length>4)$('#toasts').firstChild.remove();setTimeout(()=>t.remove(),2700)}
 function popScreen(x,y,text,cls=''){const e=document.createElement('div');e.className='pop '+cls;e.textContent=text;e.style.left=x+'px';e.style.top=y+'px';mainEl.appendChild(e);setTimeout(()=>e.remove(),900)}
 const _v=new THREE.Vector3();
 function toScreen(x,y,z){_v.set(x,y,z).project(camera);return [(_v.x+1)/2*sceneEl.clientWidth,(1-_v.y)/2*sceneEl.clientHeight]}
@@ -780,40 +816,52 @@ function goalEv(k,n=1){let all=true;for(const g of S.goals){if(!g.done&&g.k===k)
 function renderGoals(){$('#goals').innerHTML=`<div class="gh">Today's little goals <span>✦</span></div>`+S.goals.map(g=>{const t=GOALTPL.find(x=>x.k===g.k);return `<div class="g ${g.done?'done':''}"><div class="gt"><span>${t.t(g.tg)}</span><em>$${fmt(g.rew)}</em></div><div class="progress"><i style="width:${Math.min(100,g.v/g.tg*100)}%"></i></div></div>`}).join('')}
 
 /* ================= PAINTING LOOP ================= */
-function stroke(src,pt){
+function stroke(src,pt,held){
  const c=S.cur,hand=src==='hand';
  const fl=hand?flow.v:Math.max(40,flow.v);
  let pay=baseStroke()*(hand?(1+flow.v/100*(.5+.1*S.up.muse)):1.1),crit=false;if(FX.esp>0)pay*=2;
- if(hand){flow.v=Math.min(100,flow.v+9);flow.last=performance.now();if(Math.random()<.06){pay*=5;crit=true}}
+ if(hand){let fg=9;
+  if(!held){const perf=Math.abs(timPos()-zoneC)<=zoneHalf();
+   if(perf){combo=Math.min(10+S.up.steady,combo+1);zoneC=newZone();pay*=1.5+.1*combo;fg=16;c.perf=(c.perf||0)+1;S.st.perfect++;goalEv('perfect');popWorld(0,3.4,2,'✦ Perfect'+(combo>1?' ×'+combo:''),'gold');if(S.sound)tone(620+combo*35,.12,'triangle',.05)}
+   else combo=0}
+  flow.v=Math.min(100,flow.v+fg);flow.last=performance.now();if(Math.random()<.06){pay*=5;crit=true}}
+ else if(src==='artist'&&S.focus==='craft'){pay*=.65;c.perf=(c.perf||0)+.5}
  if(src!=='muse')gain(pay,hand&&pt?[pt.x,pt.y,pt.z,crit?'gold':'']:null);
  if(crit&&hand){popWorld(0,3.2,2,'✦ Inspired! ✦','gold')}
  c.progress++;c.flowSum+=fl;c.n++;S.strokes++;goalEv('stroke');redrawEasel();easel.scale.setScalar(1.035);
  if(hand&&S.sound)sBeep();
- if(c.progress>=needOf(c))completePainting()}
+ if(c.progress>=needOf(c))completePainting(src)}
 let lastPaintToast=0,lastPaintSave=0;
-function completePainting(){
+function completePainting(src){
  const c=S.cur,flowAvg=c.n?c.flowSum/c.n/100:.3;
- const score=.30*Math.random()+.35*flowAvg+Math.min(.2,S.up.brush*.02)+S.up.mentor*.015+c.bonus+(c.sb||0)+(sp$('portrait')?.05:0);
+ const score=.20*Math.random()+.25*Math.min(1,(c.perf||0)/needOf(c))+.35*flowAvg+Math.min(.2,S.up.brush*.02)+S.up.mentor*.015+c.bonus+(c.sb||0)+(sp$('portrait')?.05:0);
  const r=score>=1?4:score>=.85?3:score>=.65?2:score>=.40?1:0,st=STY[c.style];
- const p={id:S.nid++,seed:c.seed,style:c.style,rarity:r,title:`${ADJ[c.seed%ADJ.length]} ${st.nouns[(c.seed>>3)%st.nouns.length]}`,value:Math.round(paintBase()*RAR[r].m*(c.vm||1))};
- S.inv.push(p);S.done++;if(c.size==='x'||c.size==='g')S.st.murals++;if(c.size==='g')S.st.frescos++;if(p.style==='cavern')S.st.caverns++;if(r===2)S.st.rares++;if(r>=3)S.st.masters++;if(r===4)S.st.legends++;
- if(S.inv.length>capacity()){const pl=S.inv.filter(q=>!isHung(q)),sf=pl.filter(q=>!needed(q)),cand=(sf.length?sf:pl).sort((a,b)=>a.value-b.value)[0];if(cand){const pr=Math.round(cand.value*.6);removePainting(cand.id);gain(pr);toast(`Storage full — sold "${cand.title}" for $${fmt(pr)}`)}}
- S.cur=newCur(S.style,S.size);redrawEasel();dirty.coll=dirty.career=dirty.orders=true;goalEv('paint');
- const nowT=performance.now();if(r>=2||nowT-lastPaintToast>2500){lastPaintToast=nowT;toast(`🎨 ${RAR[r].n}: "${p.title}" · $${fmt(p.value)}`);r>=2?sFan():sChime()}if(nowT-lastPaintSave>3000){lastPaintSave=nowT;save()}}
+ const p={id:S.nid++,seed:c.seed,style:c.style,rarity:r,title:`${titleAdj(c)} ${st.nouns[(c.seed>>3)%st.nouns.length]}`,value:Math.round(paintBase()*RAR[r].m*(c.vm||1))};
+ S.inv.push(p);S.done++;if(c.size==='x'||c.size==='g')S.st.murals++;if(c.size==='g')S.st.frescos++;if(p.style==='cavern')S.st.caverns++;if(p.style==='winter')S.st.winters++;if(r===2)S.st.rares++;if(r>=3)S.st.masters++;if(r===4)S.st.legends++;
+ if(S.inv.length>capacity()){const pl=S.inv.filter(q=>!isHung(q)&&!q.locked),sf=pl.filter(q=>!needed(q)),cand=(sf.length?sf:pl).sort((a,b)=>a.value-b.value)[0];if(cand){const pr=Math.round(cand.value*.6);removePainting(cand.id);gain(pr);toast(`Storage full — sold "${cand.title}" for $${fmt(pr)}`)}}
+ S.cur=newCur(S.style,S.size);redrawEasel();dirty.coll=dirty.career=dirty.orders=true;goalEv('paint');zoneC=newZone();
+ const nowT=performance.now();if(r>=2||nowT-lastPaintToast>2500){lastPaintToast=nowT;toast(`🎨 ${RAR[r].n}: "${p.title}" · $${fmt(p.value)}`);r>=2?sFan():sChime()}if(nowT-lastPaintSave>3000){lastPaintSave=nowT;save()}if(src==='hand'&&r>=3)setTimeout(()=>unveil(p),350)}
+function bigThumb(p){const c=document.createElement('canvas');c.width=192;c.height=240;drawPainting(c.getContext('2d'),192,240,p,1);return c.toDataURL()}
+function unveil(p){if($('#modal').classList.contains('open')||!byId(p.id))return;const mo=MOODS[moodOf(p.title)]||MOODS.serene;
+ modal(p.rarity===4?'🌟 Legendary!':'👑 Masterpiece!',`<div style="text-align:center"><img src="${bigThumb(p)}" style="border:4px solid ${RAR[p.rarity].c};border-radius:6px;box-shadow:0 10px 30px #0003" alt=""><div style="margin:10px 0 2px;font:700 16px 'Playfair Display',serif">${esc(p.title)}</div><div>${STY[p.style].icon} ${STY[p.style].name} · ${mo.icon} ${mo.n} · $${fmt(p.value)}</div></div>`,[['Keep painting'],['Hang it',()=>{if(byId(p.id)&&!isHung(byId(p.id)))hangPainting(p.id)},'pri']])}
 function removePainting(id){S.inv=S.inv.filter(p=>p.id!==id);S.hang.forEach((x,i)=>{if(x===id){S.hang[i]=null;refreshSlot(i)}});S.offers=S.offers.filter(o=>o.pid!==id);dirty.coll=true;dirty.orders=true;dirty.career=true}
 function hangPainting(pid,slot){const p=byId(pid);if(!p)return;if(isHung(p))return;
  if(slot==null||slot<0){for(let i=0;i<slotsUnlocked();i++)if(!S.hang[i]){slot=i;break}}
  if(slot==null||slot<0){toast('All frames are full — take one down or expand the gallery');return}
  S.hang[slot]=pid;refreshSlot(slot);S.st.hangs++;goalEv('hang');dirty.coll=true;sCoin();toast(`Hung "${p.title}"`)}
+function toggleLock(pid){const p=byId(pid);if(!p)return;
+ if(p.locked){p.locked=false;toast(`🔓 Unlocked "${p.title}"`)}
+ else{if(lockedCount()>=maxLocks()){toast(`🔒 Lock limit reached (${maxLocks()}) · Storage racks raise it`);return}p.locked=true;S.offers=S.offers.filter(o=>o.pid!==pid);toast(`🔒 Locked "${p.title}" · safe from selling, auctions, donations and commissions`)}
+ dirty.coll=dirty.orders=dirty.career=true;sCoin();save()}
 function unhang(pid){const i=S.hang.indexOf(pid);if(i>=0){S.hang[i]=null;refreshSlot(i);dirty.coll=true}}
-function sellPainting(pid,price){const p=byId(pid);if(!p)return;const pr=price??sellVal(p);removePainting(pid);gain(pr);sCoin();toast(`Sold "${p.title}" for $${fmt(pr)}`);return pr}
+function sellPainting(pid,price){const p=byId(pid);if(!p)return;if(p.locked){toast('🔒 Unlock it first');return}const pr=price??sellVal(p);removePainting(pid);gain(pr);sCoin();toast(`Sold "${p.title}" for $${fmt(pr)}`);return pr}
 function buyUp(k){const u=UPS.find(x=>x.k===k),lvl=S.up[k],c=cost(u);if(lvl>=u.max||S.cash<c||(u.spec&&S.spec!==u.spec))return;S.cash-=c;S.up[k]++;
- if(k==='room'){refreshSlots();toast(S.up.room+3<=8?'A new frame is ready to hang!':'The gallery is growing!')}else if(k==='light'){hemi.intensity=2+.08*S.up.light;toast('The gallery glows warmer')}else toast({brush:'Fresh brushes! Your strokes are worth more.',assistant:'A new artist joined the studio!',market:'Word is getting around town.',muse:'The muse lamp hums.',storage:'More room for paintings.',mentor:'Your mentor sharpens your eye.',agent:'Your agent works the phones.',patron:'The patron circle grows.',autosell:'A dealer now handles your Commons.',autohang:'The gallery manager takes charge of the walls.',sitters:'More sitters line up at the door.',salesroom:'The private salesroom impresses collectors.',docents:'Docents lead visitors through the rooms.',cat:'A cat has moved in! Click it for tips.',security:'A guard now watches the walls.',gilder:'Fresh gilding catches the light.',foundation:'The foundation opens new doors.'}[k]);if(k==='cat')ensureCat();sCoin();dirty.coll=true;save()}
+ if(k==='room'){refreshSlots();toast(S.up.room+3<=8?'A new frame is ready to hang!':'The gallery is growing!')}else if(k==='light'){hemi.intensity=2+.08*S.up.light;toast('The gallery glows warmer')}else toast({brush:'Fresh brushes! Your strokes are worth more.',assistant:'A new artist joined the studio!',market:'Word is getting around town.',muse:'The muse lamp hums.',storage:'More room for paintings.',mentor:'Your mentor sharpens your eye.',agent:'Your agent works the phones.',patron:'The patron circle grows.',autosell:'A dealer now handles your Commons.',autohang:'The gallery manager takes charge of the walls.',sitters:'More sitters line up at the door.',salesroom:'The private salesroom impresses collectors.',docents:'Docents lead visitors through the rooms.',cat:'A cat has moved in! Click it for tips.',security:'A guard now watches the walls.',gilder:'Fresh gilding catches the light.',foundation:'The foundation opens new doors.',steady:'Your hand is steadier.',palette:'Your eye for color sharpens.'}[k]);if(k==='cat')ensureCat();sCoin();dirty.coll=true;save()}
 const cost=u=>Math.floor(u.base*DF().cost*Math.pow(u.g,S.up[u.k])*Math.pow(DF().late,Math.max(0,S.up[u.k]-25)));
 function buyBoost(k){const b=BOOSTS.find(x=>x.k===k);if(!b||FX[k]>0)return;const c=boostCost(b);if(S.cash<c)return;S.cash-=c;FX[k]=b.dur;toast(`${b.icon} ${b.name} for ${b.dur}s!`);sCoin()}
 
 /* ================= OFFERS, ORDERS, EVENTS ================= */
-function addOffer(buyer,p,fav,quiet,left){const price=Math.round(p.value*(1.25+Math.random()*.6)*(fav?1.35:1)*(1+.06*rankIdx())*(1+.06*S.up.agent)*dealM()*(FX.press>0?1.3:1));S.offers.push({id:S.nid++,pid:p.id,price,buyer,fav,left:left||240});dirty.orders=true;$('[data-tab=orders]').classList.add('alert');if(!quiet)toast(`💰 ${buyer} offers $${fmt(price)} for "${p.title}"`)}
+function addOffer(buyer,p,fav,quiet,left){if(p.locked)return;const price=Math.round(p.value*(1.25+Math.random()*.6)*(fav?1.35:1)*(1+.06*rankIdx())*(1+.06*S.up.agent)*dealM()*(FX.press>0?1.3:1));S.offers.push({id:S.nid++,pid:p.id,price,buyer,fav,left:left||240});dirty.orders=true;$('[data-tab=orders]').classList.add('alert');if(!quiet)toast(`💰 ${buyer} offers $${fmt(price)} for "${p.title}"`)}
 const relLvl=n=>Math.min(5,((S.clients[n]||{}).done||0)/3|0);
 function clientFor(){const free=BUYERS.filter(b=>!S.orders.some(o=>o.client===b)),pool=free.length?free:BUYERS,known=pool.filter(b=>S.clients[b]);const name=known.length&&Math.random()<.55?pick(known):pick(pool);if(!S.clients[name])S.clients[name]={fav:pick(unlockedStyles()).id,done:0};return name}
 const briefOk=(o,p)=>{if(!o.brief)return true;const a=p.title.split(' ')[0];return o.brief.t==='title'?a===o.brief.adj:MOODS[o.brief.mood].adj.includes(a)};
@@ -824,7 +872,8 @@ function newOrder(quiet){const un=unlockedStyles(),rk=rankIdx(),mx=Math.min(2,Ma
  if(S.done>=3&&Math.random()<.18){o.rush=true;o.left=300;mul*=1.8}
  const bq=Math.random();if(rk>=2&&bq<.2){o.brief={t:'title',adj:pick(ADJ)};mul*=1.6}else if(rk>=1&&bq<.5){o.brief={t:'mood',mood:pick(Object.keys(MOODS))};mul*=1.35}
  o.reward=Math.round(paintBase()*RAR[minR].m*mul*(1+.08*relLvl(client))*portOrd());o.rep=Math.round((3+minR*4)*(o.rush?1.5:1));S.orders.push(o);dirty.orders=true;$('[data-tab=orders]').classList.add('alert');if(!quiet)toast(`📜 ${o.rush?'🔥 RUSH commission':'New commission'} from ${o.client}`)}
-function orderMatch(o){return S.inv.filter(p=>p.style===o.style&&p.rarity>=o.minR&&briefOk(o,p)).sort((a,b)=>(isHung(a)-isHung(b))||a.rarity-b.rarity||a.value-b.value)[0]}
+function orderMatch(o){return S.inv.filter(p=>p.style===o.style&&p.rarity>=o.minR&&!p.locked&&briefOk(o,p)).sort((a,b)=>(isHung(a)-isHung(b))||a.rarity-b.rarity||a.value-b.value)[0]}
+const orderBest=o=>S.inv.filter(p=>p.style===o.style&&p.rarity>=o.minR&&!p.locked&&briefOk(o,p)).sort((a,b)=>b.rarity-a.rarity||b.value-a.value)[0];
 const needed=p=>S.orders.some(o=>orderMatch(o)===p)||wingReqs(chNum()).some((r,i)=>(S.wing[i]||0)<r.need&&donorFor(r)===p);
 function criticReview(p,quiet){if(DF().critic&&p.rarity===0){S.st.critics++;S.rep=Math.max(RANKS[rankIdx()][0],S.rep-3);if(!quiet)toast(`🧐 The critic pans "${p.title}" · −3 rep. Hang better art!`);return{tip:0,rep:-3}}
  const stars=Math.min(5,p.rarity+2),tip=p.value*.5,rep=Math.round((4+p.rarity*6)*(sp$('curator')?1.5:1));S.st.critics++;S.rep+=rep;gain(tip);if(!quiet)toast(`🧐 The critic gives "${p.title}" ${'★'.repeat(stars)}${'☆'.repeat(5-stars)} · +${rep} rep`);return{tip,rep}}
@@ -832,7 +881,7 @@ function criticReview(p,quiet){if(DF().critic&&p.rarity===0){S.st.critics++;S.re
 const AUC_T=20,AUC_MAX=()=>1+(sp$('dealer')?1:0)+(S.up.agent/5|0);
 const aucBid=a=>Math.round(a.price*Math.min(1,.35+.65*(1-a.left/AUC_T)));
 const auctionHtml=()=>S.auc.length?S.auc.map((a,i)=>`<div class="card-block offer"><div class="row"><b>🔨 ${esc(a.title)}</b><span class="timer" data-auc="${i}">${Math.ceil(Math.max(0,a.left))}s · $${fmt(aucBid(a))}</span></div><small>On the auction block — bidding is open…</small></div>`).join(''):'';
-function startAuction(pid){const p=byId(pid);if(!p)return;if(p.rarity<1){toast('Auctions only take Fine paintings or better');return}if(S.auc.length>=AUC_MAX()){toast('Your auction block is busy');return}
+function startAuction(pid){const p=byId(pid);if(!p)return;if(p.locked){toast('🔒 Unlock it first');return}if(p.rarity<1){toast('Auctions only take Fine paintings or better');return}if(S.auc.length>=AUC_MAX()){toast('Your auction block is busy');return}
  const price=Math.round(p.value*(1.3+Math.random()*1.7+p.rarity*.35)*(1+.06*rankIdx())*(1+.06*S.up.agent)*dealM());
  removePainting(pid);S.auc.push({title:p.title,rarity:p.rarity,left:AUC_T,price,bids:0});toast(`🔨 "${p.title}" is on the auction block…`);dirty.coll=true;save()}
 function tickAuctions(dt){if(!S.auc.length)return;for(const a of S.auc)a.left-=dt;const done=S.auc.filter(a=>a.left<=0);if(!done.length)return;S.auc=S.auc.filter(a=>a.left>0);
@@ -851,23 +900,31 @@ function makeFigure(type){const g=new THREE.Group(),cols=['#e98169','#8197c5','#
  if(type==='collector'){const hat=new THREE.Mesh(GEO.hat,mc('#1f1d1a'));hat.position.y=1.5;const br=new THREE.Mesh(GEO.brim,mc('#1f1d1a'));br.position.y=1.37;g.add(hat,br)}
  else if(type==='critic'){const be=new THREE.Mesh(GEO.beret,mc('#c9574e'));be.position.set(.03,1.32,0);be.scale.y=.6;const cl=new THREE.Mesh(GEO.clip,mc('#f5f0e7'));cl.position.set(.2,.75,.22);g.add(be,cl)}else if(type==='vip'){const cr=new THREE.Mesh(new THREE.ConeGeometry(.2,.28,6),new THREE.MeshStandardMaterial({color:'#f1c966',roughness:.3,metalness:.6}));cr.position.y=1.5;g.add(cr)}else if(type==='thief'){const cap=new THREE.Mesh(GEO.hat,mc('#17171a'));cap.position.y=1.45;const bag=new THREE.Mesh(GEO.clip,mc('#c9574e'));bag.scale.set(1.8,1.8,1.8);bag.position.set(-.22,.55,-.2);g.add(cap,bag)}
  return g}
-const bubTex={};function bubbleTex(e){return bubTex[e]||(()=>{const c=document.createElement('canvas');c.width=c.height=96;const x=c.getContext('2d');x.fillStyle='#fffdfa';x.beginPath();x.arc(48,44,38,0,7);x.fill();x.font='44px serif';x.textAlign='center';x.textBaseline='middle';x.fillText(e,48,48);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return bubTex[e]=t})()}
+const bubTex={};function bubbleTex(e){return bubTex[e]||(()=>{const c=document.createElement('canvas');c.width=c.height=96;const x=c.getContext('2d');x.fillStyle='#fffdfa';x.beginPath();x.arc(48,44,38,0,7);x.fill();x.font=([...e].length>2?'30px':'44px')+' serif';x.textAlign='center';x.textBaseline='middle';x.fillText(e,48,48);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return bubTex[e]=t})()}
 const V=[];
 function pickTarget(v){const idx=S.hang.map((id,i)=>id&&i<slotsUnlocked()&&byId(id)?i:-1).filter(i=>i>=0);
- if(idx.length){v.slot=pick(idx);const s=SLOTS[v.slot],tx=s.x+(Math.random()-.5)*.8;v.tx=tx;v.tz=s.t==='wall'?(Math.abs(tx)<1.6?.95:-1.4):s.z+1.5}
+ if(idx.length){const lk=idx.filter(i=>{const q=byId(S.hang[i]);return q&&(q.style===v.fav||moodOf(q.title)===v.mood)});v.slot=(lk.length&&Math.random()<.6)?pick(lk):pick(idx);const s=SLOTS[v.slot],tx=s.x+(Math.random()-.5)*.8;v.tx=tx;v.tz=s.t==='wall'?(Math.abs(tx)<1.6?.95:-1.4):s.z+1.5}
  else{v.slot=-1;v.tx=(Math.random()-.5)*6;v.tz=1.2}}
 function spawnVisitor(type='tourist'){if(V.length>=9)return;const g=makeFigure(type),side=Math.random()<.5?-1:1;g.position.set(side*9.2,0,1+Math.random()*1.2);scene.add(g);if(type==='vip')toast('👑 A VIP just walked in!');if(type==='thief')toast('🦹 A thief slipped in! Click them before they grab a painting');
  const spr=new THREE.Sprite(new THREE.SpriteMaterial({map:bubbleTex('🙂'),transparent:true,depthTest:false}));spr.scale.set(.55,.55,1);spr.position.y=1.95;spr.visible=false;g.add(spr);
- const v={g,spr,type,fav:pick(unlockedStyles()).id,name:pick(BUYERS),state:'in',t:0,look:3+Math.random()*3,speed:1.7+Math.random()*.8,phase:Math.random()*6,tx:0,tz:0,slot:-1};pickTarget(v);V.push(v);
- if(type==='thief'){v.speed=2.6;v.look=Math.max(3,7-.8*S.up.security);const hit=new THREE.Mesh(new THREE.BoxGeometry(.9,1.8,.9),new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}));hit.position.y=.9;hit.userData.slot='thief';hit.userData.v=v;g.add(hit);hitMeshes.push(hit);v.hit=hit}}
+ const v={g,spr,type,fav:pick(unlockedStyles()).id,mood:pick(Object.keys(MOODS)),name:pick(BUYERS),state:'in',t:0,look:3+Math.random()*3,speed:1.7+Math.random()*.8,phase:Math.random()*6,tx:0,tz:0,slot:-1};pickTarget(v);V.push(v);
+ if(type==='thief'){v.speed=2.6;v.look=Math.max(3,7-.8*S.up.security)}
+ {const hit=new THREE.Mesh(new THREE.BoxGeometry(.9,1.8,.9),new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}));hit.position.y=.9;hit.userData.slot=type==='thief'?'thief':'visitor';hit.userData.v=v;g.add(hit);hitMeshes.push(hit);v.hit=hit}}
+function tourVisitor(v){if(!v||v.toured||v.state==='out'||v.state==='react'||!['tourist','collector','vip'].includes(v.type))return;
+ const idx=S.hang.map((id,i)=>id&&i<slotsUnlocked()&&byId(id)?i:-1).filter(i=>i>=0);if(!idx.length){toast('Hang some art first!');return}
+ v.toured=true;const lk=idx.filter(i=>{const q=byId(S.hang[i]);return q&&(q.style===v.fav||moodOf(q.title)===v.mood)}),both=idx.filter(i=>{const q=byId(S.hang[i]);return q&&q.style===v.fav&&moodOf(q.title)===v.mood});
+ v.slot=both.length?both[0]:lk.length?lk[0]:pick(idx);const s=SLOTS[v.slot];v.tx=s.x;v.tz=s.t==='wall'?(Math.abs(s.x)<1.6?.95:-1.4):s.z+1.5;
+ v.boost=both.length?3:lk.length?2.2:1.5;v.look=Math.min(v.look,1.2);v.state='in';v.spr.visible=false;
+ S.st.tours++;goalEv('tour');S.rep+=.5;flow.v=Math.min(100,flow.v+12);flow.last=performance.now();popWorld(v.g.position.x,2.2,v.g.position.z,'🎫 Tour!','pink');
+ toast(both.length?'🎫 Perfect match! Tip ×3':lk.length?'🎫 Good match! Tip ×2.2':'🎫 Guided tour · tip ×1.5');sCoin()}
 const bubble=(v,e)=>{v.spr.material.map=bubbleTex(e);v.spr.material.needsUpdate=true;v.spr.visible=true};
 function visitorAct(v){const p=byId(S.hang[v.slot]);if(!p||v.slot<0){bubble(v,'🤔');return}
  if(v.type==='thief'){stealPainting(v,p);return}
  S.st.visitors++;goalEv('visit');S.rep+=.2;const match=p.style===v.fav,pos=[v.g.position.x,1.9,v.g.position.z];
  if(v.type==='vip'){const pay=Math.round(p.value*(1.5+Math.random())*(1+.06*rankIdx()));gain(pay,pos);S.rep+=4;S.st.vips++;toast(`👑 A VIP admired "${p.title}" · tipped $${fmt(pay)} · +4 rep`);bubble(v,'🤩');if(S.sound)sFan();return}
  if(v.type==='critic'){criticReview(p);bubble(v,'⭐');return}
- if(v.type==='collector'&&S.offers.length<3+(S.up.agent/5|0)+dealSlots()&&!S.offers.some(o=>o.pid===p.id)&&Math.random()<(match?.8:.5)){addOffer(v.name,p,match);bubble(v,'💰');return}
- const tip=p.value*(.1+Math.random()*.2)*(match?1.5:1)*(1+.15*S.up.light)*(FX.fair>0?2:1)*(FX.gala>0?2:1)*(1+.06*rankIdx())*curM();gain(tip,pos);S.st.tips++;bubble(v,match?'😍':'❤️');if(S.sound)sCoin()}
+ if(v.type==='collector'&&S.offers.length<3+(S.up.agent/5|0)+dealSlots()&&!p.locked&&!S.offers.some(o=>o.pid===p.id)&&Math.random()<(match?.8:.5)){addOffer(v.name,p,match);bubble(v,'💰');return}
+ const tip=p.value*(.1+Math.random()*.2)*(match?1.5:1)*(moodOf(p.title)===v.mood?1.35:1)*(v.boost||1)*(1+.15*S.up.light)*(FX.fair>0?2:1)*(FX.gala>0?2:1)*(1+.06*rankIdx())*curM();gain(tip,pos);S.st.tips++;bubble(v,match?'😍':'❤️');if(S.sound)sCoin()}
 function dropVisitor(v){scene.remove(v.g);if(v.hit){const k=hitMeshes.indexOf(v.hit);if(k>=0)hitMeshes.splice(k,1)}}
 function stealPainting(v,p){if(Math.random()<.12*S.up.security){bubble(v,'😖');toast('🚨 The alarm scared a thief off empty-handed');return}
  bubble(v,'😈');removePainting(p.id);S.st.lost++;toast(`🦹 A thief made off with "${p.title}" (${RAR[p.rarity].n})!`);tone(150,.5,'sawtooth',.05)}
@@ -882,7 +939,7 @@ function updateVisitors(dt,now){
    if(v.state==='look'||v.state==='react'){v.g.rotation.y=Math.PI}continue}
   const dx=v.tx-p.x,dz=v.tz-p.z,d=Math.hypot(dx,dz);
   if(d>.08){const s=Math.min(d,v.speed*dt);p.x+=dx/d*s;p.z+=dz/d*s;p.y=Math.abs(Math.sin(now*.01+v.phase))*.06;v.g.rotation.y=Math.atan2(dx,dz)}
-  else if(v.state==='in'){v.state='look';v.t=0;bubble(v,'🖼️')}
+  else if(v.state==='in'){v.state='look';v.t=0;bubble(v,STY[v.fav].icon+(MOODS[v.mood]||MOODS.serene).icon);0&&bubble(v,'🖼️')}
   else if(v.state==='out'){dropVisitor(v);V.splice(i,1)}}}
 function baseInterval(){const hc=hungList().length,rk=rankIdx();let t=14/(1+.18*S.up.market+.1*S.up.room+.15*rk+.12*hc);if(!hc)t*=3;if(FX.fair>0)t/=3;if(FX.open>0)t/=2;if(sp$('curator'))t/=1.2;return t}
 function spawnInterval(){return Math.max(.8,baseInterval()*rnd(.6,1.4))}
@@ -890,36 +947,37 @@ function spawnInterval(){return Math.max(.8,baseInterval()*rnd(.6,1.4))}
 /* ================= PANELS ================= */
 const T={visit:2,muse:25,order:30,critic:150,fair:300,theme:200,thief:240,save:5,hud:0,ui:0,auto:4};
 let tab='studio';
-function buildStudio(){$('#p-studio').innerHTML=`<div id="specBox"></div><div class="section-head"><b>Studio upgrades</b><span class="level-pill" id="lvPill">LVL 1</span></div>`+UPS.map(u=>`<button class="upgrade" data-up="${u.k}"><span class="up-icon">${u.icon}</span><span class="upgrade-copy"><strong>${u.name}</strong><small>${u.desc} · Lv <i>0</i></small></span><span class="up-cost"></span></button>`).join('')+`<div class="h3">Timed boosts</div>`+BOOSTS.map(b=>`<button class="upgrade" data-boost="${b.k}"><span class="up-icon">${b.icon}</span><span class="upgrade-copy"><strong>${b.name}</strong><small>${b.desc} · ${b.dur}s</small></span><span class="up-cost"></span></button>`).join('')}
+function buildStudio(){$('#p-studio').innerHTML=`<div id="specBox"></div><div id="focusBox"></div><div class="section-head"><b>Studio upgrades</b><span class="level-pill" id="lvPill">LVL 1</span></div>`+UPS.map(u=>`<button class="upgrade" data-up="${u.k}"><span class="up-icon">${u.icon}</span><span class="upgrade-copy"><strong>${u.name}</strong><small>${u.desc} · Lv <i>0</i></small></span><span class="up-cost"></span></button>`).join('')+`<div class="h3">Timed boosts</div>`+BOOSTS.map(b=>`<button class="upgrade" data-boost="${b.k}"><span class="up-icon">${b.icon}</span><span class="upgrade-copy"><strong>${b.name}</strong><small>${b.desc} · ${b.dur}s</small></span><span class="up-cost"></span></button>`).join('')}
 function updStudio(){UPS.forEach(u=>{const b=$(`[data-up=${u.k}]`),lv=S.up[u.k],c=cost(u),mx=lv>=u.max;b.querySelector('i').textContent=lv;b.querySelector('.up-cost').textContent=mx?'MAX':'$'+fmt(c);b.disabled=mx||S.cash<c;b.style.display=(!u.spec||S.spec===u.spec)?'':'none'});
  const sk=rankIdx()<3?'x':(S.spec||'none');if(sk!==specKey){specKey=sk;renderSpec()}
  BOOSTS.forEach(b=>{const el=$(`[data-boost=${b.k}]`),on=FX[b.k]>0,c=boostCost(b);el.querySelector('.up-cost').textContent=on?Math.ceil(FX[b.k])+'s':'$'+fmt(c);el.disabled=on||S.cash<c;el.style.borderColor=on?'#e5b95e':''});
+ {const fk=S.up.assistant>0?S.focus:'-';if(fk!==focusKey){focusKey=fk;renderFocus()}}
  $('#lvPill').textContent='Painting '+(S.done+1)}
 function renderCollection(){
- const items=[...S.inv].sort((a,b)=>(isHung(b)-isHung(a))||b.value-a.value),sellable=S.inv.filter(p=>!isHung(p)&&p.rarity===0);
- $('#p-collection').innerHTML=`<div class="coll-head"><b>Collection ${S.inv.length}/${capacity()}</b><button class="mini" data-act="sellcommon" ${sellable.length?'':'disabled'}>Sell unhung Commons</button></div><div class="card-block"><small>🎼 <b>Wall harmony ×${harmony().toFixed(2)}</b> · hang 3+ different styles for ×1.15, 5+ for ×1.3</small></div>${auctionHtml()}`+
- (items.length?items.map(p=>`<div class="pcard r${p.rarity}"><img src="${thumb(p)}" alt=""><div class="pc-info"><b>${esc(p.title)}</b><small>${RAR[p.rarity].n} · ${STY[p.style].icon} ${STY[p.style].name}</small><em>$${fmt(p.value)}</em> ${isHung(p)?'<span class="hungtag">· on display</span>':''}</div><div class="pc-act">${isHung(p)?`<button class="mini" data-act="unhang" data-id="${p.id}">Take down</button>`:`<button class="mini pri" data-act="hang" data-id="${p.id}">Hang</button>`}<button class="mini" data-act="sell" data-id="${p.id}">Sell</button>${p.rarity>=1?`<button class="mini" data-act="auction" data-id="${p.id}">Auction</button>`:''}</div></div>`).join(''):'<div class="empty">No paintings yet.<br>Click the easel to start your first one — it takes 12 strokes.</div>')}
+ const items=[...S.inv].sort((a,b)=>(isHung(b)-isHung(a))||b.value-a.value),sellable=S.inv.filter(p=>!isHung(p)&&p.rarity===0&&!p.locked);
+ $('#p-collection').innerHTML=`<div class="coll-head"><b>Collection ${S.inv.length}/${capacity()} · 🔒 ${lockedCount()}/${maxLocks()}</b><button class="mini" data-act="sellcommon" ${sellable.length?'':'disabled'}>Sell unhung Commons</button></div><div class="card-block"><small>🎼 <b>Wall harmony ×${harmony().toFixed(2)}</b> · hang ${3-(S.up.palette>0?1:0)}+ different styles for ×1.15, ${5-S.up.palette}+ for ×1.3</small></div>${auctionHtml()}`+
+ (items.length?items.map(p=>`<div class="pcard r${p.rarity}"><img src="${thumb(p)}" alt=""><div class="pc-info"><b>${p.locked?'🔒 ':''}${esc(p.title)}</b><small>${RAR[p.rarity].n} · ${STY[p.style].icon} ${STY[p.style].name}</small><em>$${fmt(p.value)}</em> ${isHung(p)?'<span class="hungtag">· on display</span>':''}${p.locked?'<span class="hungtag"> · locked</span>':''}</div><div class="pc-act">${isHung(p)?`<button class="mini" data-act="unhang" data-id="${p.id}">Take down</button>`:`<button class="mini pri" data-act="hang" data-id="${p.id}">Hang</button>`}<button class="mini" data-act="lock" data-id="${p.id}">${p.locked?'🔓 Unlock':'🔒 Lock'}</button>${p.locked?'':`<button class="mini" data-act="sell" data-id="${p.id}">Sell</button>`}${p.rarity>=1&&!p.locked?`<button class="mini" data-act="auction" data-id="${p.id}">Auction</button>`:''}</div></div>`).join(''):'<div class="empty">No paintings yet.<br>Click the easel to start your first one — it takes 12 strokes.</div>')}
 function renderOrders(){
  let h=`<div class="card-block offer"><div class="row"><b>📅 Daily patron's gift</b><small>🔥 ${S.day.streak}-day streak · day ${S.day.total} · ❄️ ${S.day.freeze?'freeze ready':'no freeze'}</small></div><small>A patron drops by once a day. Longer streaks earn more reputation, and one streak freeze a week forgives a missed day.</small><div class="acts"><button class="mini pri" data-act="gift" ${giftReady()?'':'disabled'}>${giftReady()?'Claim $'+fmt(giftAmt()):'Come back tomorrow'}</button></div></div><div class="h3">Collector offers</div>`;
- h+=S.offers.length?S.offers.map(o=>{const p=byId(o.pid);return `<div class="card-block offer"><div class="row"><span><b>${esc(o.buyer)}</b> offers <b>$${fmt(o.price)}</b></span><span class="timer" data-left="o${o.id}">${dur(o.left*1000)}</span></div><small>for “${esc(p.title)}” (worth $${fmt(p.value)})${o.fav?' · loves this style!':''}</small><div class="acts"><button class="mini pri" data-act="accept" data-id="${o.id}">Accept</button><button class="mini" data-act="decline" data-id="${o.id}">Decline</button></div></div>`}).join(''):'<div class="empty">No offers right now.<br>Collectors in top hats make offers on paintings they love — hang more art!</div>';
+ h+=S.offers.length?S.offers.map(o=>{const p=byId(o.pid);return `<div class="card-block offer"><div class="row"><span><b>${esc(o.buyer)}</b> offers <b>$${fmt(o.price)}</b></span><span class="timer" data-left="o${o.id}">${dur(o.left*1000)}</span></div><small>for “${esc(p.title)}” (worth $${fmt(p.value)})${o.fav?' · loves this style!':''}</small><div class="acts"><button class="mini pri" data-act="accept" data-id="${o.id}">Accept</button><button class="mini" data-act="haggle" data-id="${o.id}">Haggle 🎲</button><button class="mini" data-act="decline" data-id="${o.id}">Decline</button></div></div>`}).join(''):'<div class="empty">No offers right now.<br>Collectors in top hats make offers on paintings they love — hang more art!</div>';
  h+=`<div class="h3">Commissions</div>`;
- h+=S.orders.length?S.orders.map(o=>{const m=orderMatch(o),lv=relLvl(o.client),cl=S.clients[o.client]||{fav:o.style};return `<div class="card-block${o.rush?' offer':''}"><div class="row"><b>${esc(o.client)}${lv?' <span class="rbadge r2">'+'★'.repeat(lv)+' regular</span>':''}</b><span class="timer" data-left="c${o.id}">${dur(o.left*1000)}</span></div>${o.rush?'<span class="rbadge r4">🔥 rush · +80% pay</span> ':''}Wants a <span class="rbadge r${o.minR}">${RAR[o.minR].n}+</span> ${STY[o.style].icon} ${STY[o.style].name} piece.${o.brief?`<br><small>📝 ${esc(briefText(o))}</small>`:''}<br><small>Favorite style: ${STY[cl.fav].icon} ${STY[cl.fav].name}</small><br><small>Reward $${fmt(o.reward)} · +${o.rep} reputation</small><div class="acts"><button class="mini pri" data-act="deliver" data-id="${o.id}" ${m?'':'disabled'}>${m?'Deliver “'+esc(m.title)+'”':'No matching painting'}</button></div></div>`}).join(''):'<div class="empty">Waiting for new requests…<br>Finish a painting and clients will start to call.</div>';
+ h+=S.orders.length?S.orders.map(o=>{const m=orderMatch(o),bm=orderBest(o),lv=relLvl(o.client),cl=S.clients[o.client]||{fav:o.style};return `<div class="card-block${o.rush?' offer':''}"><div class="row"><b>${esc(o.client)}${lv?' <span class="rbadge r2">'+'★'.repeat(lv)+' regular</span>':''}</b><span class="timer" data-left="c${o.id}">${dur(o.left*1000)}</span></div>${o.rush?'<span class="rbadge r4">🔥 rush · +80% pay</span> ':''}Wants a <span class="rbadge r${o.minR}">${RAR[o.minR].n}+</span> ${STY[o.style].icon} ${STY[o.style].name} piece.${o.brief?`<br><small>📝 ${esc(briefText(o))}</small>`:''}<br><small>Favorite style: ${STY[cl.fav].icon} ${STY[cl.fav].name}</small><br><small>Reward $${fmt(o.reward)} · +${o.rep} reputation</small><div class="acts">${bm&&bm!==m?`<button class="mini" data-act="deliverbest" data-id="${o.id}">Best: “${esc(bm.title)}” · +${Math.round(35*(bm.rarity-o.minR))}% pay</button>`:''}<button class="mini pri" data-act="deliver" data-id="${o.id}" ${m?'':'disabled'}>${m?'Deliver “'+esc(m.title)+'”':'No matching painting'}</button></div></div>`}).join(''):'<div class="empty">Waiting for new requests…<br>Finish a painting and clients will start to call.</div>';
  $('#p-orders').innerHTML=h}
 /* ================= CAMPAIGN: THE ROAD TO THE RETROSPECTIVE ================= */
-const FINAL=7,CH_DAYS=[1,2,3,4,5,6,7,12],STAR_BY=[3,4,5,6,7,8,10],NEED_TROPHIES=40,DAY=864e5;
-const earnGate=n=>DF().gate*(n<8?7.5e6*Math.pow(2.4,n):7.5e6*Math.pow(2.4,7)*Math.pow(1.5,n-7));
+const FINAL=7,CH_MIN=[2,3,5,7,9,11,14,18],STAR_BY=[3,4,5,6,7,8,10],NEED_TROPHIES=25,DAY=864e5,MIN=6e4;
+const earnGate=n=>DF().gate*(n<8?3e5*Math.pow(2.3,n):3e5*Math.pow(2.3,7)*Math.pow(1.5,n-7));
 const dur=ms=>{const s=Math.ceil(ms/1000),d=s/86400|0,h=s%86400/3600|0,m=s%3600/60|0;return d?`${d}d ${h}h`:h?`${h}h ${m}m`:`${m}m ${s%60}s`};
 const dayNum=()=>Math.floor((NOW()-new Date().getTimezoneOffset()*6e4)/DAY);
 const giftReady=()=>S.day.claimed!==dayNum(),giftAmt=()=>Math.round(Math.max(500,passive()*900+baseStroke()*500));
 function checkDay(){const d=dayNum();if(S.day.last===d)return;const wk=Math.floor(d/7);if(S.day.fweek!==wk){S.day.fweek=wk;S.day.freeze=1}let froze=false;if(S.day.last===d-1)S.day.streak++;else if(S.day.last===d-2&&S.day.freeze>0){S.day.freeze--;S.day.streak++;froze=true}else S.day.streak=1;S.day.last=d;S.day.total++;dirty.orders=true;$('[data-tab=orders]').classList.add('alert');toast(`📅 Day ${S.day.total} of your gallery · ${S.day.streak}-day streak${froze?' · ❄️ streak freeze saved it':''}`)}
 const chNum=()=>Math.min(S.moves,FINAL);
 function wingReqs(n){if(S.won||n>FINAL)return[];const R=(style,minR,need)=>({style,minR,need});
- if(n===FINAL)return[...STYLES.map(s=>R(s.id,3,1)),R(null,4,3)];
+ if(n===FINAL)return[...STYLES.filter(s=>s.id!=='winter').map(s=>R(s.id,3,1)),R(null,4,3)];
  return[[R(null,1,3)],[R('harbor',1,3)],[R(null,2,3)],[R('moon',2,3)],[R('abstract',3,3)],[R('desert',3,3)],[R('blossom',3,2),R(null,4,1)]][n]}
 const reqLabel=r=>`${RAR[r.minR].n}${r.minR<4?'+':''} · ${r.style?STY[r.style].icon+' '+STY[r.style].name:'any style'}`;
-const donorFor=rq=>S.inv.filter(p=>(!rq.style||p.style===rq.style)&&p.rarity>=rq.minR).sort((a,b)=>(isHung(a)-isHung(b))||a.rarity-b.rarity||a.value-b.value)[0];
+const donorFor=rq=>S.inv.filter(p=>(!rq.style||p.style===rq.style)&&p.rarity>=rq.minR&&!p.locked).sort((a,b)=>(isHung(a)-isHung(b))||a.rarity-b.rarity||a.value-b.value)[0];
 function chStatus(){const n=chNum(),rq=wingReqs(n);
- const earn=S.run>=earnGate(S.moves),wing=rq.every((r,i)=>(S.wing[i]||0)>=r.need),rem=S.won?0:Math.max(0,S.chStart+(CH_DAYS[n]||0)*DAY-NOW()),time=rem<=0,trophy=n<FINAL||!!S.won||got.size>=NEED_TROPHIES;
+ const earn=S.run>=earnGate(S.moves),wing=rq.every((r,i)=>(S.wing[i]||0)>=r.need),rem=S.won?0:Math.max(0,S.chStart+(CH_MIN[n]||0)*MIN-NOW()),time=rem<=0,trophy=n<FINAL||!!S.won||got.size>=NEED_TROPHIES;
  return{n,rq,earn,wing,rem,time,trophy,ok:earn&&wing&&time&&trophy}}
 function chapterLine(cs){if(S.won)return 'Retrospective cleared ★ · Endless mode';const n=cs.n;if(n<FINAL)return `Chapter ${n+1}/8 · ${cs.rem>0?'next venue in '+dur(cs.rem):'next venue ready'}`;return `Final chapter · opening ${cs.rem>0?'in '+dur(cs.rem):'ready'}`}
 function donate(i){const rq=wingReqs(chNum())[i];if(!rq)return;const have=S.wing[i]||0;if(have>=rq.need)return;const p=donorFor(rq);if(!p){toast('No matching painting yet');return}
@@ -929,13 +987,13 @@ function renderCareer(){const st=chStatus(),n=st.n,here=CITIES[S.moves%CITIES.le
  const reqs=st.rq.map((r,i)=>`<div class="req" id="rq${i}"><div class="row"><span>🖼️ ${reqLabel(r)}</span><small id="rw${i}"></small></div><div class="acts"><button class="mini pri" data-donate="${i}">Donate best match</button></div></div>`).join('');
  $('#p-fame').innerHTML=`<div class="fame-big"><div class="n" id="fStars">★ 0</div><small id="fBonus"></small></div>
  <div class="card-block"><div class="row"><b>${fin?'Final chapter':'Chapter '+(n+1)+' of 8'} · ${esc(here.n)}</b>${S.won?'<span class="rbadge r3">Cleared</span>':''}</div><div class="road">${pips}</div>
- ${S.won?`<small>You opened the Grand Retrospective in <b>${((S.won-S.born)/DAY).toFixed(1)} days</b>. Endless mode: keep relocating for more Fame Stars.</small>`:`<small>${fin?'Open <b>The Grand Retrospective</b> to finish the story.':'Next venue: <b>'+esc(next.n)+'</b>.'} Meet every requirement below.</small>`}
+ ${S.won?`<small>You opened the Grand Retrospective in <b>${dur(S.won-S.born)}</b>. Endless mode: keep relocating for more Fame Stars.</small>`:`<small>${fin?'Open <b>The Grand Retrospective</b> to finish the story.':'Next venue: <b>'+esc(next.n)+'</b>.'} Meet every requirement below.</small>`}
  <div class="req" id="rqE"><div class="row"><span>💰 Earn this run</span><small id="rEt"></small></div><div class="pbar"><i id="rEb"></i></div></div>
  ${reqs}
  ${S.won?'':`<div class="req" id="rqT"><div class="row"><span>⏳ ${fin?'Retrospective preparations':'Venue renovation'}</span><small id="rTt"></small></div><div class="pbar"><i id="rTb"></i></div></div>`}
  ${fin?`<div class="req" id="rqK"><div class="row"><span>🏆 Trophies</span><small id="rKt"></small></div><div class="pbar"><i id="rKb"></i></div></div>`:''}
  <div class="acts"><button class="mini pri" id="relocate" style="width:100%;padding:10px"></button></div></div>
- <div class="card-block"><small>Relocating resets funds, upgrades and paintings. You keep trophies, reputation and Fame Stars (+8% to everything each), and every new city multiplies your earnings ×1.6. The renovation timer runs in real time, even while the game is closed. Your regular clients follow you to every new city.</small></div>
+ <div class="card-block"><small>Relocating resets funds and orders, drops upgrades to 30%, and keeps 3 heirloom paintings (locked ones first, then your best). You keep trophies, reputation and Fame Stars (+8% to everything each), and every new city multiplies your earnings ×1.6. The renovation timer runs in real time, even while the game is closed. Your regular clients follow you to every new city.</small></div>
  <div class="card-block"><div class="row"><b>🎚️ Difficulty</b><span class="rbadge r3">${DIFFS[S.diff].n}</span></div><small>${DIFFS[S.diff].desc}</small><div class="acts" style="flex-wrap:wrap">${DIFFS.map((d,i)=>`<button class="mini ${S.diff===i?'pri':''}" data-diff="${i}">${d.n}</button>`).join('')}</div></div>
  <div class="h3">Lifetime stats</div><div id="fStats"></div>
  <div class="acts" style="margin-top:10px"><button class="mini" id="notifybtn"></button><button class="mini" id="saveio">Backup &amp; restore save</button></div><small style="display:block;margin-top:6px;color:var(--muted)">Alerts arrive while this tab is open, even in the background. The tab title also shows the countdown.</small>`}
@@ -943,19 +1001,28 @@ function updFame(){const st=chStatus(),n=st.n,fin=n===FINAL&&!S.won,gate=earnGat
  {const nb=document.getElementById('notifybtn');if(nb){const ok='Notification' in window;nb.disabled=!ok;nb.textContent=!ok?'🔔 Alerts unsupported here':S.notify?'🔔 Venue alerts on · turn off':'🔔 Alert me when a venue is ready'}}set('fStars','★ '+S.stars);set('fBonus','+'+S.stars*8+'% to everything, forever');
  set('rEt',`$${fmt(Math.min(S.run,gate))} / $${fmt(gate)}`);wd('rEb',S.run/gate*100);ok('rqE',st.earn);
  st.rq.forEach((r,i)=>{const have=S.wing[i]||0,sy=r.style?STY[r.style]:null,locked=sy&&S.rep<sy.unlock;set('rw'+i,`${have}/${r.need}${locked?' · needs '+sy.unlock+' rep':''}`);ok('rq'+i,have>=r.need);const b=document.querySelector(`[data-donate="${i}"]`);if(b)b.disabled=have>=r.need||!donorFor(r)});
- if(!S.won){const tot=(CH_DAYS[n]||1)*DAY;set('rTt',st.rem>0?dur(st.rem)+' left':'Done ✓');wd('rTb',(tot-st.rem)/tot*100);ok('rqT',st.time)}
+ if(!S.won){const tot=(CH_MIN[n]||1)*MIN;set('rTt',st.rem>0?dur(st.rem)+' left':'Done ✓');wd('rTb',(tot-st.rem)/tot*100);ok('rqT',st.time)}
  if(fin){set('rKt',`${got.size} / ${NEED_TROPHIES}`);wd('rKb',got.size/NEED_TROPHIES*100);ok('rqK',st.trophy)}
  const b=$('#relocate');if(b){b.disabled=!st.ok;b.textContent=!st.ok?'Not ready yet':fin?'🏛️ Open the Grand Retrospective':'Relocate to '+CITIES[(S.moves+1)%CITIES.length].n+' · ★ +'+STAR_BY[Math.min(S.moves,6)]}
  const days=((NOW()-S.born)/DAY).toFixed(1),sts=[['Days since opening',days],['Days visited',S.day.total],['Earned all-time','$'+fmt(S.lifetime)],['Paintings finished',fmt(S.done)],['Brushstrokes',fmt(S.strokes)],['Visitors welcomed',fmt(S.st.visitors)],['Offers accepted',S.st.sales],['Commissions done',S.st.orders],['Auctions won',S.st.auctions],['Murals painted',S.st.murals],['VIPs hosted',S.st.vips],['Cat pets',S.st.pets],['Rare / Masterpiece / Legendary',S.st.rares+' / '+(S.st.masters-S.st.legends)+' / '+S.st.legends],['Reputation',Math.floor(S.rep)]];
  $('#fStats').innerHTML=sts.map(r=>`<div class="stat"><span>${r[0]}</span><span>${r[1]}</span></div>`).join('')}
-function victory(){S.won=NOW();S.rep+=1000;S.chStart=NOW();dirty.career=true;sFan();save();const d=((S.won-S.born)/DAY).toFixed(1);
- modal('🏛️ The Grand Retrospective opens',`Critics, collectors and strangers from every city you painted in walk through your life's work. You finished <i>Little Gallery</i> in <b>${d} days</b>, with <b>${got.size}</b> trophies and <b>$${fmt(S.lifetime)}</b> earned.<br><br>The gallery stays open — Endless mode keeps going.`,[['Keep painting',null,'pri']])}
+function victory(){S.won=NOW();S.rep+=1000;S.chStart=NOW();dirty.career=true;sFan();save();const d=dur(S.won-S.born);
+ modal('🏛️ The Grand Retrospective opens',`Critics, collectors and strangers from every city you painted in walk through your life's work. You finished <i>Little Gallery</i> in <b>${d}</b>, with <b>${got.size}</b> trophies and <b>$${fmt(S.lifetime)}</b> earned.<br><br>The gallery stays open — Endless mode keeps going.`,[['Keep painting',null,'pri']])}
+const STORY=['Back at the beginning, but not the same painter. The Sunroom looks smaller, and brighter, and yours.',
+ 'A fisherman buys your first harbor scene and tells the whole pier. The loft smells of salt and varnish, and the light is better than you deserve.',
+ 'From up here the sunsets last all evening. A string of lights goes up over the terrace, and visitors start staying past closing.',
+ 'Chandeliers. Champagne. A critic in the back row who pretends not to take notes. You take a breath and hang your best work in the center.',
+ 'Silk drapes and sand-colored light. A traveling collector asks where the red mesa painting came from. You tell them: your hands.',
+ 'Petals drift through the open doors. Someone has left a note on your easel: "Slow down. Look." So you do.',
+ 'Cold sky, warm lamps, a fire crackling while you work. Some of the finest paintings you have made come from this room.',
+ 'Marble, gold, and every city you have ever painted in, arriving at once. One more room to fill: the Grand Retrospective.'];
+function storyModal(){const c=CITIES[S.moves%CITIES.length];modal(c.n,STORY[S.moves%STORY.length],[['Onward',null,'pri']])}
 function relocate(){const st=chStatus();if(!st.ok)return;
  if(st.n===FINAL&&!S.won){modal('Open the Retrospective?',`Everything you've painted comes together in <b>The Rotunda</b>. This ends the main story. You can keep playing in Endless mode afterwards.`,[['Not yet'],['Open the doors',victory,'pri']]);return}
  const g=STAR_BY[Math.min(S.moves,6)],nxt=CITIES[(S.moves+1)%CITIES.length],repBonus=100*(Math.min(S.moves,7)+1);
- modal('Relocate the gallery?',`You'll earn <b>★ ${g}</b> and <b>+${repBonus} reputation</b>, and move to <b>${nxt.n}</b> (all earnings ×1.6). Funds, upgrades, paintings, offers and orders reset. Trophies, reputation, Fame Stars and your regular clients stay. You will choose a specialization again.`,[['Not yet'],['Relocate',()=>{
-  S.stars+=g;S.rep+=repBonus;S.moves++;S.chStart=NOW();S.wing=[];S.spec=null;FX.esp=FX.open=FX.press=FX.gala=0;S.cash=50*S.stars;S.run=0;Object.keys(S.up).forEach(k=>S.up[k]=0);S.inv=[];S.hang=Array(8).fill(null);S.offers=[];S.orders=[];S.cur=newCur(S.style,S.size);flow.v=0;hemi.intensity=2;V.splice(0).forEach(dropVisitor);
-  applyCity();ensureCat();refreshSlots();redrawEasel();dirty.coll=dirty.orders=dirty.career=true;T.order=20;toast(`Welcome to ${CITIES[S.moves%CITIES.length].n}! ★ +${g}`);sFan();save()},'pri']])}
+ modal('Relocate the gallery?',`You'll earn <b>★ ${g}</b> and <b>+${repBonus} reputation</b>, and move to <b>${nxt.n}</b> (all earnings ×1.6). Funds, offers and orders reset, and upgrades drop to 30%. You keep 3 heirloom paintings (locked ones first, then your best), plus trophies, reputation, Fame Stars and your regular clients. You will choose a specialization again.`,[['Not yet'],['Relocate',()=>{
+  S.stars+=g;S.rep+=repBonus;S.moves++;S.chStart=NOW();S.wing=[];S.spec=null;FX.esp=FX.open=FX.press=FX.gala=0;S.cash=50*S.stars;S.run=0;Object.keys(S.up).forEach(k=>{const u=UPS.find(x=>x.k===k);S.up[k]=(u&&u.max>1&&!u.spec)?Math.floor(S.up[k]*.3):0});S.inv=[...S.inv].sort((a,b)=>(!!b.locked-!!a.locked)||b.value-a.value).slice(0,3);S.st.heir+=S.inv.length;S.hang=Array(8).fill(null);S.offers=[];S.orders=[];S.cur=newCur(S.style,S.size);flow.v=0;hemi.intensity=2;V.splice(0).forEach(dropVisitor);
+  applyCity();ensureCat();refreshSlots();redrawEasel();dirty.coll=dirty.orders=dirty.career=true;T.order=20;setTimeout(storyModal,900);toast(`Welcome to ${CITIES[S.moves%CITIES.length].n}! ★ +${g}`);sFan();save()},'pri']])}
 function saveModal(){S.bk=NOW();save();let code='';try{code=btoa(unescape(encodeURIComponent(localStorage.getItem(KEY)||'')))}catch(e){}
  modal('Backup & restore',`Your progress lives in this browser only. Copy this code somewhere safe; paste a code here to restore it on any device.<textarea class="save-area" id="saveBox" spellcheck="false">${code}</textarea>`,[['Close'],['Load pasted code',()=>{try{const raw=decodeURIComponent(escape(atob($('#saveBox').value.trim()))),o=JSON.parse(raw);if(typeof o.cash!=='number')throw 0;noSave=true;localStorage.setItem(KEY,raw);location.reload()}catch(e){toast('That code did not work')}},'pri']])}
 function setDiff(i){if(!DIFFS[i]||S.diff===i)return;S.diff=i;toast(`🎚️ Difficulty: ${DIFFS[i].n}`);dirty.career=true;dirty.coll=true;save()}
@@ -964,19 +1031,24 @@ function renderStyles(){const el=$('#styles');el.innerHTML=STYLES.map(s=>{const 
 function setTab(t){tab=t;$$('.tab').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));$$('.panel').forEach(p=>p.classList.toggle('on',p.id==='p-'+t));$(`[data-tab=${t}]`).classList.remove('alert');if(t==='collection')dirty.coll=true;if(t==='orders')dirty.orders=true;if(t==='fame')dirty.career=true}
 $('#tabs').addEventListener('click',e=>{const b=e.target.closest('.tab');if(b)setTab(b.dataset.tab)});
 $('#p-studio').addEventListener('click',e=>{const b=e.target.closest('[data-up]');if(b){buyUp(b.dataset.up);return}
+ const fo=e.target.closest('[data-focus]');if(fo){S.focus=fo.dataset.focus;focusKey='';save();return}
  const sp=e.target.closest('[data-spec]');if(sp){const k=sp.dataset.spec,s=SPEC[k];modal(`Become a ${s.n}?`,`${s.d}.<br><br>You can choose a different path after your next relocation.`,[['Not yet'],['Choose',()=>{S.spec=k;specKey='';toast(`${s.icon} You are now a ${s.n}`);sFan();save()},'pri']]);return}
  const bo=e.target.closest('[data-boost]');if(bo)buyBoost(bo.dataset.boost)});
 $('#styles').addEventListener('click',e=>{const b=e.target.closest('[data-style]');if(!b)return;S.style=b.dataset.style;if(S.cur.progress>0&&S.cur.style!==S.style)toast(`Next painting: ${STY[S.style].name}`);else{S.cur.style=S.style;redrawEasel()}dirty.styles=true});
 function renderSizes(){$('#sizes').innerHTML='<span class="sz-l">Canvas</span>'+SIZES.map(z=>{const un=rankIdx()>=z.rk;return `<button class="sty ${S.size===z.id?'on':''}" data-size="${z.id}" ${un?'':'disabled'}>${un?z.icon+' '+z.n+' · '+z.need+' strokes':'🔒 '+z.n+' · '+RANKS[z.rk][1]}</button>`}).join('')}
+function renderMoods(){$('#moods').innerHTML='<span class="sz-l">Mood</span>'+[['auto','✨','Auto'],...Object.entries(MOODS).map(([k,m])=>[k,m.icon,m.n])].map(([k,i,n])=>`<button class="sty ${S.mood===k?'on':''}" data-mood="${k}">${i} ${n}</button>`).join('')}
+$('#moods').addEventListener('click',e=>{const b=e.target.closest('[data-mood]');if(!b)return;S.mood=b.dataset.mood;renderMoods();toast(S.mood==='auto'?'Mood: surprise me':'Next paintings will be '+MOODS[S.mood].n);save()});
 $('#sizes').addEventListener('click',e=>{const b=e.target.closest('[data-size]');if(!b||b.disabled)return;S.size=b.dataset.size;if(S.cur.progress>0&&(S.cur.size||'m')!==S.size)toast(`Next canvas: ${SZ[S.size].n}`);else{S.cur=newCur(S.style,S.size);redrawEasel()}sizeKey=''});
 $('#p-collection').addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b)return;const id=+b.dataset.id,a=b.dataset.act;
- if(a==='hang')hangPainting(id);else if(a==='unhang')unhang(id);else if(a==='sell')sellPainting(id);else if(a==='auction')startAuction(id);
- else if(a==='sellcommon'){let tot=0,n=0;S.inv.filter(p=>!isHung(p)&&p.rarity===0).forEach(p=>{tot+=p.value;n++;removePainting(p.id)});gain(tot);if(n){sCoin();toast(`Sold ${n} Commons for $${fmt(tot)}`)}}});
+ if(a==='hang')hangPainting(id);else if(a==='unhang')unhang(id);else if(a==='sell')sellPainting(id);else if(a==='auction')startAuction(id);else if(a==='lock')toggleLock(id);
+ else if(a==='sellcommon'){let tot=0,n=0;S.inv.filter(p=>!isHung(p)&&p.rarity===0&&!p.locked).forEach(p=>{tot+=p.value;n++;removePainting(p.id)});gain(tot);if(n){sCoin();toast(`Sold ${n} Commons for $${fmt(tot)}`)}}});
 $('#p-orders').addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b)return;const id=+b.dataset.id,a=b.dataset.act;
  if(a==='gift'){if(!giftReady())return;S.day.claimed=dayNum();gain(giftAmt());S.rep+=6+2*Math.min(S.day.streak,15);sFan();toast(`📅 Daily gift claimed · ${S.day.streak}-day streak`);dirty.orders=true}
- else if(a==='accept'){const o=S.offers.find(x=>x.id===id),p=o&&byId(o.pid);if(!p)return;S.offers=S.offers.filter(x=>x.id!==id);sellPainting(p.id,o.price);S.st.sales++;S.rep+=2+p.rarity*2;goalEv('sell');toast(`🤝 Sold to ${o.buyer}`)}
+ else if(a==='accept'){const o=S.offers.find(x=>x.id===id),p=o&&byId(o.pid);if(!p)return;if(p.locked){toast('🔒 Unlock it first');return}S.offers=S.offers.filter(x=>x.id!==id);sellPainting(p.id,o.price);S.st.sales++;S.rep+=2+p.rarity*2;goalEv('sell');toast(`🤝 Sold to ${o.buyer}`)}
+ else if(a==='haggle'){const o=S.offers.find(x=>x.id===id);if(!o)return;if(o.hag){toast('They will not budge twice');return}
+  if(Math.random()<.5+(sp$('dealer')?.1:0)){o.price*=2;o.price=Math.round(o.price);o.hag=1;S.st.hags++;toast(`🎲 ${o.buyer} doubles the offer · $${fmt(o.price)}`);sCoin()}else{S.offers=S.offers.filter(x=>x.id!==id);toast(`🎲 ${o.buyer} walks away…`);tone(180,.4,'sawtooth',.04)}dirty.orders=true}
  else if(a==='decline'){S.offers=S.offers.filter(x=>x.id!==id);dirty.orders=true}
- else if(a==='deliver'){const o=S.orders.find(x=>x.id===id),p=o&&orderMatch(o);if(!p)return;S.orders=S.orders.filter(x=>x.id!==id);removePainting(p.id);gain(o.reward);S.rep+=o.rep;S.st.orders++;{const cl=S.clients[o.client]||(S.clients[o.client]={fav:o.style,done:0}),b0=relLvl(o.client);cl.done++;if(relLvl(o.client)>b0)toast(`⭐ ${o.client} is now a regular (${'★'.repeat(relLvl(o.client))}) · +8% on their commissions`)}goalEv('order');sFan();toast(`📜 Delivered to ${o.client} · +$${fmt(o.reward)}`);dirty.orders=true}});
+ else if(a==='deliver'||a==='deliverbest'){const o=S.orders.find(x=>x.id===id),p=o&&(a==='deliver'?orderMatch(o):orderBest(o));if(!p)return;if(a==='deliverbest')o.reward=Math.round(o.reward*(1+.35*(p.rarity-o.minR)));S.orders=S.orders.filter(x=>x.id!==id);removePainting(p.id);gain(o.reward);S.rep+=o.rep;S.st.orders++;{const cl=S.clients[o.client]||(S.clients[o.client]={fav:o.style,done:0}),b0=relLvl(o.client);cl.done++;if(relLvl(o.client)>b0)toast(`⭐ ${o.client} is now a regular (${'★'.repeat(relLvl(o.client))}) · +8% on their commissions`)}goalEv('order');sFan();toast(`📜 Delivered to ${o.client} · +$${fmt(o.reward)}`);dirty.orders=true}});
 $('#reset').addEventListener('click',()=>modal('Start a fresh canvas?','This wipes <b>everything</b>: funds, paintings, trophies and Fame Stars.',[['Keep playing'],['Wipe it all',()=>{noSave=true;try{localStorage.removeItem(KEY)}catch(e){}location.reload()},'pri']]));
 $('#sound').addEventListener('click',e=>{S.sound=!S.sound;e.currentTarget.textContent=S.sound?'♫':'♪';toast(S.sound?'Sound on':'Sound off')});
 const queue=[];let showing=false;
@@ -988,25 +1060,26 @@ function renderCabinet(full){const n=got.size;$('#cabCount').textContent=n+' / '
 const openCabinet=()=>{renderCabinet(true);$('#cabinet').classList.add('open');$('#trophy').classList.remove('new')},closeCabinet=()=>$('#cabinet').classList.remove('open');
 $('#trophy').addEventListener('click',openCabinet);$('#cabClose').addEventListener('click',closeCabinet);$('#cabinet').addEventListener('pointerdown',e=>{if(e.target.id==='cabinet')closeCabinet()});
 addEventListener('keydown',e=>{if(e.key==='Escape'){closeCabinet();hideCtx();if(!paused)$('#modal').classList.remove('open')}
- if((e.key===' '||e.key==='Enter')&&!paused&&!/^(BUTTON|TEXTAREA|INPUT)$/.test(document.activeElement.tagName)&&!$('#modal').classList.contains('open')&&!$('#cabinet').classList.contains('open')){e.preventDefault();ensureAudio();const t=performance.now();if(t-lastBrush>110){lastBrush=t;stroke('hand',{x:0,y:2.4,z:2})}}});
+ if((e.key===' '||e.key==='Enter')&&!paused&&!/^(BUTTON|TEXTAREA|INPUT)$/.test(document.activeElement.tagName)&&!$('#modal').classList.contains('open')&&!$('#cabinet').classList.contains('open')){e.preventDefault();ensureAudio();const t=performance.now();if(t-lastBrush>110){lastBrush=t;stroke('hand',{x:0,y:2.4,z:2},e.repeat)}}});
 
 /* ================= INPUT ================= */
-const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2();let brushing=false,overEasel=false,lastBrush=0,lastPt=null;
-function pickAt(e){const r=renderer.domElement.getBoundingClientRect();pointer.set((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1);raycaster.setFromCamera(pointer,camera);return raycaster.intersectObjects(hitMeshes,false)[0]}
+const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2();let brushing=false,overEasel=false,lastBrush=0,lastPt=null,swayT=0,sway=0;
+function pickAt(e){const r=renderer.domElement.getBoundingClientRect();pointer.set((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1);raycaster.setFromCamera(pointer,camera);const hs=raycaster.intersectObjects(hitMeshes,false);return hs.find(x=>x.object.userData.slot==='easel')||hs[0]}
 const ctxEl=$('#ctx'),tipEl=$('#tip');
 function hideCtx(){ctxEl.style.display='none'}
 function placeAt(el,e){const r=mainEl.getBoundingClientRect();el.style.display='block';const w=el.offsetWidth,h=el.offsetHeight;el.style.left=clamp(e.clientX-r.left+12,6,r.width-w-6)+'px';el.style.top=clamp(e.clientY-r.top+12,6,r.height-h-6)+'px'}
 renderer.domElement.addEventListener('pointerdown',e=>{ensureAudio();hideCtx();const h=pickAt(e);if(!h)return;const id=h.object.userData.slot;
  if(id==='cat'){petCat();return}
  if(id==='thief'){catchThief(h.object.userData.v);return}
+ if(id==='visitor'){tourVisitor(h.object.userData.v);return}
  if(id==='easel'){brushing=true;overEasel=true;lastBrush=performance.now();lastPt=h.point;stroke('hand',h.point)}
  else{const i=id,p=byId(S.hang[i]);
   if(i>=slotsUnlocked()){toast('Locked — expand the gallery in the Studio tab');return}
   if(!p){const best=S.inv.filter(q=>!isHung(q)).sort((a,b)=>b.value-a.value)[0];if(best)hangPainting(best.id,i);else toast('No paintings in storage — go paint one!');return}
-  ctxEl.innerHTML=`<b>${esc(p.title)}</b><small>${RAR[p.rarity].n} · ${STY[p.style].name} · $${fmt(p.value)}</small><div class="acts"><button class="mini" id="cx1">Take down</button><button class="mini pri" id="cx2">Sell $${fmt(sellVal(p))}</button></div>`;placeAt(ctxEl,e);
-  $('#cx1').onclick=()=>{unhang(p.id);hideCtx()};$('#cx2').onclick=()=>{sellPainting(p.id);hideCtx()}}});
-renderer.domElement.addEventListener('pointermove',e=>{const h=pickAt(e);overEasel=!!h&&h.object.userData.slot==='easel';if(overEasel)lastPt=h.point;renderer.domElement.style.cursor=h?(overEasel?'crosshair':'pointer'):'default';
- if(h&&h.object.userData.slot==='cat'){tipEl.innerHTML=cat&&cat.cool>0?'🐈 The cat is napping':'🐈 Pet the cat';placeAt(tipEl,e)}else if(h&&h.object.userData.slot==='thief'){tipEl.innerHTML='🦹 Catch the thief!';placeAt(tipEl,e)}else if(h&&h.object.userData.slot!=='easel'){const i=h.object.userData.slot,p=byId(S.hang[i]);tipEl.innerHTML=i>=slotsUnlocked()?'🔒 Locked frame':p?`<b>${esc(p.title)}</b> · ${RAR[p.rarity].n} · $${fmt(p.value)}`:'Empty frame — click to hang your best painting';placeAt(tipEl,e)}else tipEl.style.display='none'});
+  ctxEl.innerHTML=`<b>${esc(p.title)}</b><small>${RAR[p.rarity].n} · ${STY[p.style].name} · $${fmt(p.value)}</small><div class="acts"><button class="mini" id="cx1">Take down</button><button class="mini" id="cx3">${p.locked?'🔓 Unlock':'🔒 Lock'}</button><button class="mini pri" id="cx2" ${p.locked?'disabled':''}>Sell $${fmt(sellVal(p))}</button></div>`;placeAt(ctxEl,e);
+  $('#cx1').onclick=()=>{unhang(p.id);hideCtx()};$('#cx2').onclick=()=>{sellPainting(p.id);hideCtx()};$('#cx3').onclick=()=>{toggleLock(p.id);hideCtx()}}});
+renderer.domElement.addEventListener('pointermove',e=>{swayT=(e.clientX/innerWidth-.5)*2;const h=pickAt(e);overEasel=!!h&&h.object.userData.slot==='easel';if(overEasel)lastPt=h.point;renderer.domElement.style.cursor=h?(overEasel?'crosshair':'pointer'):'default';
+ if(h&&h.object.userData.slot==='cat'){tipEl.innerHTML=cat&&cat.cool>0?'🐈 The cat is napping':'🐈 Pet the cat';placeAt(tipEl,e)}else if(h&&h.object.userData.slot==='visitor'){const vv=h.object.userData.v;tipEl.innerHTML=vv.toured?'🎫 Already toured':`🎫 Give a tour · likes ${STY[vv.fav].icon} ${MOODS[vv.mood].icon}`;placeAt(tipEl,e)}else if(h&&h.object.userData.slot==='thief'){tipEl.innerHTML='🦹 Catch the thief!';placeAt(tipEl,e)}else if(h&&h.object.userData.slot!=='easel'){const i=h.object.userData.slot,p=byId(S.hang[i]);tipEl.innerHTML=i>=slotsUnlocked()?'🔒 Locked frame':p?`<b>${esc(p.title)}</b> · ${RAR[p.rarity].n} · $${fmt(p.value)}`:'Empty frame — click to hang your best painting';placeAt(tipEl,e)}else tipEl.style.display='none'});
 renderer.domElement.addEventListener('pointerleave',()=>{tipEl.style.display='none';overEasel=false});
 addEventListener('pointerup',()=>{brushing=false});
 
@@ -1018,10 +1091,10 @@ function collectMuse(){if(!muse)return;muse.el.remove();muse=null;flow.v=100;flo
 
 /* ================= HUD ================= */
 let lastRank=rankIdx(),relocAlerted=false,styleKey='',sizeKey='';
-function hintText(){if(S.done===0)return `Click, hold or press Space to paint <b>·</b> each stroke earns <b>$${fmt(baseStroke()*(1+flow.v/100*.5))}</b>`;
+function hintText(){if(S.done===0)return `Tap in the <b>green zone</b> for Perfect strokes, or hold to paint steadily <b>·</b> each stroke earns <b>$${fmt(baseStroke()*(1+flow.v/100*.5))}</b>`;
  if(!S.hang.some((id,i)=>id&&i<slotsUnlocked())&&S.inv.length)return 'Painting done! <b>Hang it</b> from the Collection tab, or click an empty frame';
  if(S.st.visitors===0)return 'Visitors are on their way — art on the walls draws a crowd';
- return `Hold the easel to build <b>Flow</b> · $${fmt(baseStroke()*(1+flow.v/100*(.5+.1*S.up.muse)))}/stroke`}
+ return `Tap the green zone for <b>Perfect</b> combos, hold for <b>Flow</b> · $${fmt(baseStroke()*(1+flow.v/100*(.5+.1*S.up.muse)))}/stroke`}
 function refreshHUD(){checkDay();
  $('#cash').textContent='$'+fmt(S.cash);$('#rate').textContent=fmt(passive());
  const rk=rankIdx(),cr=RANKS[rk],nx=RANKS[rk+1];$('#rank').textContent=cr[1];$('#repBar').style.width=(nx?(S.rep-cr[0])/(nx[0]-cr[0])*100:100)+'%';$('#stars').textContent='★ '+S.stars;
@@ -1040,12 +1113,14 @@ function refreshHUD(){checkDay();
  {const cs=chStatus();if(cs.ok){if(!relocAlerted){relocAlerted=true;toast(cs.n===FINAL&&!S.won?'🏛️ The Retrospective is ready to open!':'🌍 Your next venue is ready!');$('[data-tab=fame]').classList.add('alert')}}else relocAlerted=false;$('#locSub').textContent=chapterLine(cs)}
  const b=$('#banner'),ab=BOOSTS.find(x=>FX[x.k]>0);if(FX.fair>0){b.textContent=`🎪 Art Fair · ${Math.ceil(FX.fair)}s left · visitors ×3`;b.classList.add('show')}else if(ab){b.textContent=`${ab.icon} ${ab.name} · ${Math.ceil(FX[ab.k])}s left`;b.classList.add('show')}else if(THEME.left>0){b.textContent=`🎨 ${STY[THEME.style].name} Exhibition · ${Math.ceil(THEME.left)}s · matching art ×2.5`;b.classList.add('show')}else b.classList.remove('show')}
 
+const tCurEl=$('#tCur'),tZoneEl=$('#tZone'),tTxtEl=$('#tTxt');
+function updTiming(){const now=performance.now();tPhase+=Math.min(100,now-tLast)*timSpeed();tLast=now;const z=zoneHalf();tZoneEl.style.left=((zoneC-z)*100)+'%';tZoneEl.style.width=(z*200)+'%';tCurEl.style.left=timPos()*100+'%';tTxtEl.textContent=combo>1?'×'+combo:'-'}
 /* ================= LOOP ================= */
 function update(dt,now){
  // flow
  if(performance.now()-flow.last>700&&flow.v>0)flow.v=Math.max(0,flow.v-28/(1+.12*S.up.muse)/(FX.esp>0?2:1)*dt);
  // held brush
- if(brushing&&overEasel&&performance.now()-lastBrush>130){lastBrush=performance.now();stroke('hand',lastPt)}
+ if(brushing&&overEasel&&performance.now()-lastBrush>130){lastBrush=performance.now();stroke('hand',lastPt,true)}
  // artists
  if(S.up.assistant){T.art=(T.art||0)+dt*.5*S.up.assistant;let n=0;while(T.art>=1&&n<4){T.art--;n++;stroke('artist')}if(T.art>4)T.art=0}
  // exhibit income
@@ -1053,7 +1128,7 @@ function update(dt,now){
  // automation
  T.auto-=dt;if(T.auto<=0){T.auto=4;
   if(S.up.autohang){for(let i=0;i<slotsUnlocked();i++)if(!S.hang[i]){const best=S.inv.filter(q=>!isHung(q)).sort((a,b)=>b.value-a.value)[0];if(best)hangPainting(best.id,i);else break}}
-  if(S.up.autosell){const cm=S.inv.filter(p=>!isHung(p)&&p.rarity===0&&!needed(p));if(cm.length>=3){let tot=0;cm.forEach(p=>{tot+=p.value;removePainting(p.id)});gain(tot);toast(`🧾 Dealer sold ${cm.length} Commons · $${fmt(tot)}`)}}}
+  if(S.up.autosell){const cm=S.inv.filter(p=>!isHung(p)&&p.rarity===0&&!p.locked&&!needed(p));if(cm.length>=3){let tot=0;cm.forEach(p=>{tot+=p.value;removePainting(p.id)});gain(tot);toast(`🧾 Dealer sold ${cm.length} Commons · $${fmt(tot)}`)}}}
  // events
  T.visit-=dt;if(T.visit<=0){T.visit=spawnInterval();const rk=rankIdx();spawnVisitor(rk>=2&&Math.random()<(FX.gala>0?.3:.04)?'vip':Math.random()<.2+.04*rk+.02*S.up.agent+(sp$('dealer')?.08:0)?'collector':'tourist')}
  if(DF().thief&&S.done>=5&&rankIdx()>=3&&hungList().length>=2){T.thief-=dt;if(T.thief<=0){T.thief=rnd(200,320)/DF().thief*(1+.25*S.up.security);
@@ -1074,7 +1149,7 @@ function update(dt,now){
 let last=performance.now();
 function animate(now){requestAnimationFrame(animate);if(S.lowp&&now-last<45)return;const rdt=(now-last)/1000;last=now;let dt=Math.min(rdt,.1);
  if(!paused&&rdt>2)offlineGain(Math.min(rdt,36000),false);
- if(!paused)update(dt,now);cityGroups[S.moves%CITIES.length].userData.tick(dt,now);flushEasel();scene.rotation.y=Math.sin(now*.0003)*.008;
+ if(!paused)update(dt,now);cityGroups[S.moves%CITIES.length].userData.tick(dt,now);flushEasel();updTiming();sway+=(swayT-sway)*.04;camera.position.x=sway*.45;camera.lookAt(0,2.15,0);sun.intensity=3.2+Math.sin(now*.00025)*.5;sun.position.x=-4+Math.sin(now*.00025)*4;scene.rotation.y=Math.sin(now*.0003)*.008;
  for(const id in medals){const m=medals[id],t0=m.userData.t0;if(t0){const k=(now-t0)/1100;if(k>=1){m.userData.t0=0;m.scale.setScalar(1);m.position.y=m.userData.base;m.rotation.z=0}else{const s=Math.sin(k*Math.PI);m.scale.setScalar(1+.7*s*(1-k));m.position.y=m.userData.base+.25*s*(1-k);m.rotation.z=Math.sin(k*18)*.25*(1-k)}}}
  renderer.render(scene,camera)}
 const OFF=.35;
@@ -1083,7 +1158,7 @@ function offlineGain(sec){if(sec<2)return;tickAuctions(sec);const t=sec*OFF,ex=e
   if(hc){vis=Math.min(600,Math.floor(t/Math.max(.8,baseInterval())));coll=Math.round(vis*Math.min(.9,.2+.04*rk+.02*S.up.agent+(sp$('dealer')?.08:0)));
    const avg=hung.reduce((s,p)=>s+p.value,0)/hc;tips=Math.round((vis-coll)*avg*.2*1.1*(1+.15*S.up.light)*(1+.06*rk)*curM());
    const room=Math.max(0,3+(S.up.agent/5|0)+dealSlots()-S.offers.length);
-   for(let i=0;i<Math.min(room,coll);i++){const pool=hung.filter(p=>!S.offers.some(o=>o.pid===p.id));if(!pool.length)break;addOffer(pick(BUYERS),pick(pool),Math.random()<.3,true,600);offs++}
+   for(let i=0;i<Math.min(room,coll);i++){const pool=hung.filter(p=>!p.locked&&!S.offers.some(o=>o.pid===p.id));if(!pool.length)break;addOffer(pick(BUYERS),pick(pool),Math.random()<.3,true,600);offs++}
    if(S.done>=3){crit=Math.min(3,Math.floor(t/185));for(let i=0;i<crit;i++)ctip+=criticReview(pick(hung),true).tip}
    S.st.visitors+=vis;S.st.tips+=vis-coll;S.rep+=vis*.2;if(vis)goalEv('visit',vis)}
   if(S.done>=1){ords=Math.min(Math.max(0,3-S.orders.length),Math.floor(t/45));for(let i=0;i<ords;i++)newOrder(true)}}
@@ -1117,12 +1192,12 @@ async function toggleNotify(){if(!('Notification' in window)){toast('Alerts are 
 
 /* ================= BOOT ================= */
 $('#sound').textContent=S.sound?'♫':'♪';
-buildStudio();applyCity();ensureCat();applyPower();syncMedals();renderCabinet();refreshSlots();redrawEasel();resize();
+buildStudio();renderMoods();applyCity();ensureCat();applyPower();syncMedals();renderCabinet();refreshSlots();redrawEasel();resize();
 if(!S.goals.length)newGoals();else dirty.goals=true;
 if(returning){const away=(NOW()-S.seen)/1000;if(away>90)offlineGain(Math.min(away,36000),true)}
 setTimeout(()=>{S.cur.style=S.cur.progress?S.cur.style:S.style},0);
 refreshHUD();requestAnimationFrame(animate);musicLoop();
-if(!returning)setTimeout(()=>modal('Welcome to Little Gallery',`Your goal: open <b>The Grand Retrospective</b>. It is a long road of <b>8 chapters</b>, one city each, and at least <b>40 real days</b> end to end. To move to the next venue you must earn enough, <b>donate paintings</b> to its new wing, and wait out its <b>real-time renovation</b>, which keeps ticking while the game is closed. Come back daily for the patron's gift. Your progress is saved in this browser only, so use <b>Backup &amp; restore</b> in the Career tab now and then.<br><br>This edition starts on <b>Hard</b>: change the difficulty any time in the Career tab.<br><br>Click or hold the easel to begin.`,[["Let's paint",null,'pri']]),700);
+if(!returning)setTimeout(()=>modal('Welcome to Little Gallery',`Your goal: open <b>The Grand Retrospective</b>. It is a road of <b>8 chapters</b>, one city each, about <b>2-3 hours</b> end to end. To move to the next venue you must earn enough, <b>donate paintings</b> to its new wing, and wait out its <b>real-time renovation</b>, which keeps ticking while the game is closed. Come back daily for the patron's gift. Your progress is saved in this browser only, so use <b>Backup &amp; restore</b> in the Career tab now and then.<br><br>This edition starts on <b>Classic</b>: change the difficulty any time in the Career tab.<br><br>Tap the easel when the marker is in the <b>green zone</b> for Perfect strokes and combos. Click visitors to give them a tour.`,[["Let's paint",null,'pri']]),700);
 addEventListener('storage',e=>{if(e.key===OWN&&e.newValue&&e.newValue!==TAB)pauseTab()});addEventListener('beforeunload',save);document.addEventListener('visibilitychange',()=>{if(document.hidden)save()});
 window.__lgBoot=1;setInterval(slowTick,1000);slowTick();
 setTimeout(()=>$('#loading').classList.add('done'),500);
